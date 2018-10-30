@@ -1,0 +1,15 @@
+{
+  "name": "reconstructor",
+  "version": "1.0.0",
+  "description": "Discord Bot",
+  "main": "Index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jake Waggoner",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.4.2"
+  },
+  "devDependencies": {}
+}
