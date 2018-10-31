@@ -58,6 +58,5 @@ function createARole(message, args)
         .then(role => message.channel.send(util.format("Created role with name %s and with color %s",role.name,role.color)))
            .catch(console.error);
 }
-
 //Login the bot using the token generated from discord
 bot.login(Token);
