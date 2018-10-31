@@ -1,5 +1,14 @@
+/*
+    Goal: Manage Roles, Nicknames, and Channels. Be able to change nicknames based on roles, change
+    role names, change the nickname of anyone, autoplace new members into roles, and
+    add new roles/delete roles/channels.
+*/
+
 //Require Discord.js
 const Discord = require("discord.js");
+
+const util = require('util');
+
 //Login token
 const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DrKrTQ.d8B7SRdvru4eZvzIVERquYJ_qx8";
 
@@ -21,46 +30,34 @@ bot.on("message", message =>
     {
         return;
     }
-    if (message.content == "hello")
-    {
-        message.channel.sendMessage("Hi, there!");
-    }
-    if (!message.content.startsWith(prefix))
-    {
-        return;
-    }
-    else
+    if (message.content.startsWith(prefix))
     {
         var args = message.content.substring(prefix.length).split(" ");
 
         switch (args[0])
         {
             case "ping":
-                message.channel.sendMessage("pong");
+                message.channel.send("pong");
                 break;
             case "CreateRole":
-                var creatingRole = true;
-                var creator = message.author;
-                message.channel.sendMessage("What would you like the role to be called?")
+                createARole(message, args);
                 break;
             default:
-                if (!creatingRole)
-                    message.channel.sendMessage("Sorry, I didnt get that...");
-        }
-    }
-    if(creatingRole == true)
-    {
-        if (message.author.equals(creator))
-        {
-            message.guild.createRole(
-                {
-                    name: message.content
-                })
-                .then(role => message.channel.sendMessage("Created role with the name ${role.name}"))
-                .catch(console.error)
+                    message.channel.send("Sorry, I didnt get that...");
         }
     }
 });
+
+function createARole(message, args) 
+{
+    message.guild.createRole(
+        {
+            name: args[1],
+            color: args[2]
+        })
+        .then(role => message.channel.send(util.format("Created role with name %s and with color %s",role.name,role.color)))
+           .catch(console.error);
+}
 
 //Login the bot using the token generated from discord
 bot.login(Token);
