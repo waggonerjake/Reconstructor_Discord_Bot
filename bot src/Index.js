@@ -32,7 +32,7 @@ bot.on("message", message =>
     }
     if (message.content.startsWith(prefix))
     {
-        var args = message.content.substring(prefix.length).split(" ");
+        var args = message.content.substring(prefix.length).split(", ");
 
         switch (args[0])
         {
@@ -53,7 +53,7 @@ function createARole(message, args)
     message.guild.createRole(
         {
             name: args[1],
-            color: args[2]
+            color: args[2].toUpperCase()
         })
         .then(role => message.channel.send(util.format("Created role with name %s and with color %s",role.name,role.color)))
            .catch(console.error);
