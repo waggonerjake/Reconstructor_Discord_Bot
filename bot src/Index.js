@@ -7,7 +7,15 @@
 //Require Discord.js
 const Discord = require("discord.js");
 
+//Require util
 const util = require('util');
+
+const COLOR_NAMES = ['DEFAULT', 'AQUA', 'GREEN', 'BLUE', 'PURPLE', 'LUMINOUS_VIVID_PINK', 'GOLD', 'ORANGE', 'RED', 'GREY', 'DARKER_GREY', 'NAVY', 'DARK_AQUA',
+    'DARK_GREEN','DARK_BLUE','DARK_PURPLE','DARK_VIVID_PINK','DARK_GOLD','DARK_ORANGE','DARK_RED','DARK_GREY','LIGHT_GREY','DARK_NAVY'];
+
+const COLOR_NUMBERS = [0, 1752220, 3066993, 3447003, 10181046, 15277667, 15844367, 15105570, 15158332, 9807270, 8359053, 3426654, 1146986, 2067276, 2123412, 7419530,
+    11342935, 12745742, 11027200, 10038562, 9936031, 12370112, 2899536];
+
 
 //Login token
 const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DrKrTQ.d8B7SRdvru4eZvzIVERquYJ_qx8";
@@ -30,16 +38,19 @@ bot.on("message", message =>
     {
         return;
     }
+
     if (message.content.startsWith(prefix))
     {
+        //Split every command by a comma and a space
         var args = message.content.substring(prefix.length).split(", ");
 
         switch (args[0])
         {
-            case "ping":
-                message.channel.send("pong");
+            case "test":
+                message.channel.send("Testing! Testing! 1...2...3");
                 break;
             case "CreateRole":
+                args[2] = checkColor(args[2]);
                 createARole(message, args);
                 break;
             default:
@@ -55,8 +66,22 @@ function createARole(message, args)
             name: args[1],
             color: args[2].toUpperCase()
         })
-        .then(role => message.channel.send(util.format("Created role with name %s and with color %s",role.name,role.color)))
-           .catch(console.error);
+        .then(role => message.channel.send(util.format("Created role with name \'%s\' and with color \'%s\'", role.name,getColorName(role.color))))
+        .catch(console.error);
 }
+
+//Used to check if the color provided by the user is a valid color, if not, just set it to default
+function checkColor(color)
+{
+    return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
+}
+
+//Used to 'map' the color decimal value to the string value
+function getColorName(decimal)
+{
+    var index = COLOR_NUMBERS.findIndex(element => element === decimal);
+    return COLOR_NAMES[index].toLowerCase();
+}
+
 //Login the bot using the token generated from discord
 bot.login(Token);
