@@ -44,13 +44,13 @@ bot.on("message", message =>
         //Split every command by a comma and a space
         var args = message.content.substring(prefix.length).split(", ");
 
-        switch (args[0])
+        switch (args[0].toLowerCase())
         {
             case "test":
                 message.channel.send("Testing! Testing! 1...2...3");
                 break;
-            case "CreateRole":
-                args[2] = checkColor(args[2]);
+            case "create role":
+                args[2] = validateColor(args[2]);
                 createARole(message, args);
                 break;
             default:
@@ -66,21 +66,30 @@ function createARole(message, args)
             name: args[1],
             color: args[2].toUpperCase()
         })
-        .then(role => message.channel.send(util.format("Created role with name \'%s\' and with color \'%s\'", role.name,getColorName(role.color))))
+        .then(role => message.channel.send(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
         .catch(console.error);
 }
 
 //Used to check if the color provided by the user is a valid color, if not, just set it to default
-function checkColor(color)
+function validateColor(color)
 {
+    color = removeWhiteSpaceFromColor(color);
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
+}
+
+function removeWhiteSpaceFromColor(color)
+{
+    //The 'g' in the regex function means global, and this means
+    //do not stop after the first instance of the character, find
+    //all of them
+     return color.replace(/\s/g, "_");
 }
 
 //Used to 'map' the color decimal value to the string value
 function getColorName(decimal)
 {
     var index = COLOR_NUMBERS.findIndex(element => element === decimal);
-    return COLOR_NAMES[index].toLowerCase();
+    return COLOR_NAMES[index].toLowerCase().replace(/_/g, " ");
 }
 
 //Login the bot using the token generated from discord
