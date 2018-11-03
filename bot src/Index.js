@@ -50,11 +50,8 @@ bot.on("message", message =>
                 message.channel.send("Testing! Testing! 1...2...3");
                 break;
             case "create role":
-                if (validateAuthor(message.member))
-                {
                     args[2] = validateColor(args[2]);
                     createARole(message, args);
-                }
                 break;
             default:
                     message.channel.send("Sorry, I didnt get that...");
