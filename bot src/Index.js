@@ -50,8 +50,11 @@ bot.on("message", message =>
                 message.channel.send("Testing! Testing! 1...2...3");
                 break;
             case "create role":
-                args[2] = validateColor(args[2]);
-                createARole(message, args);
+                if(validateAuthor(message.member))
+                {
+                    args[2] = validateColor(args[2]);
+                    createARole(message, args);
+                }
                 break;
             case "delete role":
                 deleteARole(args[1]);
@@ -61,6 +64,13 @@ bot.on("message", message =>
         }
     }
 });
+
+//Used to check if the author of the message has the correct permission to manange roles
+function validateAuthor(author)
+{
+    //Params: Permission, explicit(Depreceated), Admin. Override?, Owner Override?
+    author.hasPermission("MANAGE_ROLES", false, true, true)
+}
 
 function createARole(message, args) 
 {
