@@ -53,6 +53,9 @@ bot.on("message", message =>
                 args[2] = validateColor(args[2]);
                 createARole(message, args);
                 break;
+            case "delete role":
+                deleteARole(args[1]);
+                break;
             default:
                     message.channel.send("Sorry, I didnt get that...");
         }
@@ -67,6 +70,16 @@ function createARole(message, args)
             color: args[2].toUpperCase()
         })
         .then(role => message.channel.send(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
+        .catch(console.error);
+}
+
+function deleteARole(message, args)
+{
+    message.guild.role.deleted(
+        {
+            role: args[1]
+        })
+        .then(role => message.channel.send(util.format("Created role with name \'%s\' ", role.name)))
         .catch(console.error);
 }
 
