@@ -16,6 +16,8 @@ const COLOR_NAMES = ['DEFAULT', 'AQUA', 'GREEN', 'BLUE', 'PURPLE', 'LUMINOUS_VIV
 const COLOR_NUMBERS = [0, 1752220, 3066993, 3447003, 10181046, 15277667, 15844367, 15105570, 15158332, 9807270, 8359053, 3426654, 1146986, 2067276, 2123412, 7419530,
     11342935, 12745742, 11027200, 10038562, 9936031, 12370112, 2899536];
 
+var currentRoles = [];
+var currentRoleNames = [];
 
 //Login token
 const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DrKrTQ.d8B7SRdvru4eZvzIVERquYJ_qx8";
@@ -34,6 +36,10 @@ bot.on("ready", startUp =>
 //When we recieve a message, do this function
 bot.on("message", message =>
 {
+    //get the roles, and their names before they are even needed
+    currentRoles = getRoles(message);
+    currentRoleNames = getRoleNames(message, currentRoles);
+
     if (message.author.equals(bot.user))
     {
         return;
@@ -41,46 +47,93 @@ bot.on("message", message =>
 
     if (message.content.startsWith(prefix))
     {
-        //Split every command by a comma and a space
-        var args = message.content.substring(prefix.length).split(", ");
+        var doesUserHavePermission = false;
 
-        switch (args[0].toLowerCase())
+        //Split every command by a comma and a space
+        var command = message.content.substring(prefix.length).split(", ");
+
+        switch (command[0].toLowerCase())
         {
             case "test":
-                message.channel.send("Testing! Testing! 1...2...3");
+                message.reply("Testing! Testing! 1...2...3");
                 break;
             case "create role":
-                args[2] = validateColor(args[2]);
-                createARole(message, args);
+                doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
+                if (doesUserHavePermission)
+                {
+                    command[2] = validateColor(command[2]);
+                    createARole(message, command);
+                }
                 break;
             case "delete role":
-                deleteARole(args[1]);
+                doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
+                //console.log(currentRoleNames);
+                //console.log(currentRoles);
+                if (doesUserHavePermission)
+                {
+                    validateRole(command[1]) ? deleteARole(message, command) : message.reply("Please choose a valid role!");
+                }
                 break;
             default:
-                    message.channel.send("Sorry, I didnt get that...");
+                    message.channel.reply("Sorry, I didnt get that...");
         }
+        if (!doesUserHavePermission)
+            message.reply("You do not have the required permissions to perform that action.");
     }
 });
 
-function createARole(message, args) 
+function createARole(message, command) 
 {
     message.guild.createRole(
         {
-            name: args[1],
-            color: args[2].toUpperCase()
+            name: command[1],
+            color: command[2].toUpperCase()
         })
-        .then(role => message.channel.send(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
+        .then(role => message.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
         .catch(console.error);
 }
 
-function deleteARole(message, args)
+function deleteARole(message, command)
 {
-    message.guild.role.deleted(
-        {
-            role: args[1]
-        })
-        .then(role => message.channel.send(util.format("Created role with name \'%s\' ", role.name)))
-        .catch(console.error);
+        console.log("Role exists. Pretend its deleted");
+        //TO DO: Have it delete a role that is in the list of roles
+}
+
+//Gets the actual role object, to retrieve names of roles, use getRoleNames()
+function getRoles(message)
+{
+    var presentRoles = [];
+    var roleCollection = message.guild.roles;
+    var keysToRoles = roleCollection.keyArray();
+    var numberOfRoles = keysToRoles.length;
+
+    for (i = 1; i < numberOfRoles; ++i)
+    {
+        presentRoles.push(roleCollection.get(keysToRoles[i]));
+    }
+    return presentRoles;
+}
+
+function getRoleNames(message, currentRoles)
+{
+    var presentRoleNames = [];
+    for (i = 1; i < currentRoles.length; ++i)
+    {
+        presentRoleNames.push(currentRoles[i].name.toLowerCase());
+    }
+    return presentRoleNames;
+}
+
+//Used to check if the author of the message has the correct permission to manange roles
+function validateAuthor(author, action) {
+    switch (action) {
+        case "MANAGE_ROLES":
+            //Params: Permission, explicit(Depreceated), Admin. Override?, Owner Override?
+            return author.hasPermission(action, false, true, true)
+            break;
+        default:
+            return false;
+    }
 }
 
 //Used to check if the color provided by the user is a valid color, if not, just set it to default
@@ -88,6 +141,12 @@ function validateColor(color)
 {
     color = removeWhiteSpaceFromColor(color);
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
+}
+
+//Used to check if the role entered by the user is a valid role
+function validateRole(role)
+{
+    return currentRoleNames.includes(role.toLowerCase());
 }
 
 function removeWhiteSpaceFromColor(color)
