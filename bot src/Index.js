@@ -16,6 +16,8 @@ const COLOR_NAMES = ['DEFAULT', 'AQUA', 'GREEN', 'BLUE', 'PURPLE', 'LUMINOUS_VIV
 const COLOR_NUMBERS = [0, 1752220, 3066993, 3447003, 10181046, 15277667, 15844367, 15105570, 15158332, 9807270, 8359053, 3426654, 1146986, 2067276, 2123412, 7419530,
     11342935, 12745742, 11027200, 10038562, 9936031, 12370112, 2899536];
 
+var currentMessage;
+
 var currentRoles = [];
 var currentRoleNames = [];
 
@@ -36,9 +38,6 @@ bot.on("ready", startUp =>
 //When we recieve a message, do this function
 bot.on("message", message =>
 {
-    //get the roles, and their names before they are even needed
-    currentRoles = getRoles(message);
-    currentRoleNames = getRoleNames(message, currentRoles);
 
     if (message.author.equals(bot.user))
     {
@@ -47,7 +46,16 @@ bot.on("message", message =>
 
     if (message.content.startsWith(prefix))
     {
+        //Setting member variable to the last sent message
+        currentMessage = message;
+
+        //get the roles, and their names before they are even needed
+        currentRoles = getRoles();
+        currentRoleNames = getRoleNames();
+
+        //Used for permission check
         var doesUserHavePermission = false;
+        var tryingToCommand = false;
 
         //Split every command by a comma and a space
         var command = message.content.substring(prefix.length).split(", ");
@@ -57,53 +65,61 @@ bot.on("message", message =>
             case "test":
                 message.reply("Testing! Testing! 1...2...3");
                 break;
+
             case "create role":
+                tryingToCommand = true;
                 doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    command[2] = validateColor(command[2]);
-                    createARole(message, command);
+                    //Check if the user even inputed a color
+                    (command[2]) ? (command[2] = validateColor(command[2])) : (command[2] = 'DEFAULT');
+                    createARole(command);
+                    //createARole(message, command);
                 }
                 break;
+
             case "delete role":
+                tryingToCommand = true;
                 doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
-                //console.log(currentRoleNames);
-                //console.log(currentRoles);
+                console.log(currentRoles);
+                console.log(currentRoleNames);
                 if (doesUserHavePermission)
                 {
-                    validateRole(command[1]) ? deleteARole(message, command) : message.reply("Please choose a valid role!");
+                    validateRole(command[1]) ? deleteARole(command) : message.reply("Please choose a valid role!");
                 }
                 break;
+
             default:
-                    message.channel.reply("Sorry, I didnt get that...");
+                    message.reply("Sorry, I didnt get that...");
         }
-        if (!doesUserHavePermission)
+        if (!doesUserHavePermission && tryingToCommand)
+        {
             message.reply("You do not have the required permissions to perform that action.");
+        }
     }
 });
 
-function createARole(message, command) 
-{
-    message.guild.createRole(
+function createARole(command) {
+    currentMessage.guild.createRole(
         {
             name: command[1],
             color: command[2].toUpperCase()
         })
-        .then(role => message.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
+        .then(role => currentMessage.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
         .catch(console.error);
 }
 
-function deleteARole(message, command)
+function deleteARole(command)
 {
         console.log("Role exists. Pretend its deleted");
         //TO DO: Have it delete a role that is in the list of roles
 }
 
 //Gets the actual role object, to retrieve names of roles, use getRoleNames()
-function getRoles(message)
+function getRoles()
 {
     var presentRoles = [];
-    var roleCollection = message.guild.roles;
+    var roleCollection = currentMessage.guild.roles;
     var keysToRoles = roleCollection.keyArray();
     var numberOfRoles = keysToRoles.length;
 
@@ -114,7 +130,7 @@ function getRoles(message)
     return presentRoles;
 }
 
-function getRoleNames(message, currentRoles)
+function getRoleNames()
 {
     var presentRoleNames = [];
     for (i = 1; i < currentRoles.length; ++i)
@@ -146,7 +162,9 @@ function validateColor(color)
 //Used to check if the role entered by the user is a valid role
 function validateRole(role)
 {
-    return currentRoleNames.includes(role.toLowerCase());
+    var doesRoleExist = false;
+    (role) ? doesRoleExist = currentRoleNames.includes(role.toLowerCase()) : doesRoleExist = false;
+    return doesRoleExist;
 }
 
 function removeWhiteSpaceFromColor(color)
