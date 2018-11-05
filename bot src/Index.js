@@ -74,7 +74,6 @@ bot.on("message", message =>
                     //Check if the user even inputed a color
                     (command[2]) ? (command[2] = validateColor(command[2])) : (command[2] = 'DEFAULT');
                     createARole(command);
-                    //createARole(message, command);
                 }
                 break;
 
