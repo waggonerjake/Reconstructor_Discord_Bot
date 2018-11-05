@@ -62,9 +62,12 @@ bot.on("message", message =>
 
         switch (command[0].toLowerCase())
         {
-            case "test":
-                message.reply("Testing! Testing! 1...2...3");
-                break;
+            //case "test":
+            //    message.reply("Testing! Testing! 1...2...3");
+            //    break;
+            case "No u":
+                    message.reply("Damn bro chill");
+                    break;
 
             case "create role":
                 tryingToCommand = true;
