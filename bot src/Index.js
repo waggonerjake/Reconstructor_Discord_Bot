@@ -68,7 +68,7 @@ bot.on("message", message =>
 
             case "create role":
                 tryingToCommand = true;
-                doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
+                doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
                     //Check if the user even inputed a color
@@ -79,9 +79,9 @@ bot.on("message", message =>
 
             case "delete role":
                 tryingToCommand = true;
-                doesUserHavePermission = validateAuthor(message.member, "MANAGE_ROLES");
-                console.log(currentRoles);
-                console.log(currentRoleNames);
+                doesUserHavePermission = validateAuthor("MANAGE_ROLES");
+                //console.log(currentRoles);
+                //console.log(currentRoleNames);
                 if (doesUserHavePermission)
                 {
                     validateRole(command[1]) ? deleteARole(command) : message.reply("Please choose a valid role!");
@@ -140,12 +140,14 @@ function getRoleNames()
 }
 
 //Used to check if the author of the message has the correct permission to manange roles
-function validateAuthor(author, action) {
+function validateAuthor(action) {
+    var author = currentMessage.member;
     switch (action) {
         case "MANAGE_ROLES":
             //Params: Permission, explicit(Depreceated), Admin. Override?, Owner Override?
             return author.hasPermission(action, false, true, true)
             break;
+
         default:
             return false;
     }
