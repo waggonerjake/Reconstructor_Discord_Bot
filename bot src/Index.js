@@ -110,7 +110,10 @@ function createARole(command) {
 
 function deleteARole(command)
 {
-        console.log("Role exists. Pretend its deleted");
+    var role = getRoleFromName(command[1]);
+    role.delete('The role needed to go')
+        .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
+        .catch(console.error);
         //TO DO: Have it delete a role that is in the list of roles
 }
 
@@ -132,7 +135,7 @@ function getRoles()
 function getRoleNames()
 {
     var presentRoleNames = [];
-    for (i = 1; i < currentRoles.length; ++i)
+    for (i = 0; i < currentRoles.length; ++i)
     {
         presentRoleNames.push(currentRoles[i].name.toLowerCase());
     }
@@ -181,6 +184,13 @@ function getColorName(decimal)
 {
     var index = COLOR_NUMBERS.findIndex(element => element === decimal);
     return COLOR_NAMES[index].toLowerCase().replace(/_/g, " ");
+}
+
+//Used to 'map' the role name to the role object
+function getRoleFromName(roleName)
+{
+    var index = currentRoleNames.findIndex(element => element === roleName);
+    return currentRoles[index];
 }
 
 //Login the bot using the token generated from discord
