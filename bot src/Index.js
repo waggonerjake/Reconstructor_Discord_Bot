@@ -22,7 +22,7 @@ var currentRoles = [];
 var currentRoleNames = [];
 
 //Login token
-const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DrKrTQ.d8B7SRdvru4eZvzIVERquYJ_qx8";
+const Token = ""; 
 
 const prefix = "//"
 
@@ -32,6 +32,8 @@ var bot = new Discord.Client();
 //When the bot is first activated, say "Ready" in the console
 bot.on("ready", startUp =>
 {
+    if (Token.length === 0)
+        console.log("I do not have my token filled in yet!");
     console.log("Ready");
 });
 
