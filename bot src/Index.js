@@ -1,7 +1,7 @@
 /*
     Goal: Manage Roles, Nicknames, and Channels. Be able to change nicknames based on roles, change
     role names, change the nickname of anyone, autoplace new members into roles, and
-    add new roles/delete roles/channels.
+    add new roles/channles and delete roles/channels.
 */
 
 //Require Discord.js
@@ -20,6 +20,8 @@ var currentMessage;
 
 var currentRoles = [];
 var currentRoleNames = [];
+var currentMembers = [];
+var currentUserIDs = [];
 
 //Login token
 const Token = ""; 
@@ -32,14 +34,12 @@ var bot = new Discord.Client();
 //When the bot is first activated, say "Ready" in the console
 bot.on("ready", startUp =>
 {
-    if (Token.length === 0)
-        console.log("I do not have my token filled in yet!");
-    console.log("Ready");
+    console.log("Remove Token!");
 });
 
+
 //When we recieve a message, do this function
-bot.on("message", message =>
-{
+bot.on("message", message => {
 
     if (message.author.equals(bot.user))
     {
@@ -51,15 +51,14 @@ bot.on("message", message =>
         //Setting member variable to the last sent message
         currentMessage = message;
 
-        //get the roles, and their names before they are even needed
         currentRoles = getRoles();
         currentRoleNames = getRoleNames();
+        currentMembers = getAllMembers();
+        currentUserIDs = getUserIDs();
 
-        //Used for permission check
         var doesUserHavePermission = false;
         var tryingToCommand = false;
 
-        //Split every command by a comma and a space
         var command = message.content.substring(prefix.length).split(", ");
 
         switch (command[0].toLowerCase())
@@ -73,7 +72,6 @@ bot.on("message", message =>
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    //Check if the user even inputed a color
                     (command[2]) ? (command[2] = validateColor(command[2])) : (command[2] = 'DEFAULT');
                     createARole(command);
                 }
@@ -90,6 +88,25 @@ bot.on("message", message =>
                 }
                 break;
 
+            case "show roles":
+                message.reply(rolesToString() + "are the current roles");
+                break;
+
+            case "change nickname":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_NICKNAMES");
+                if (doesUserHavePermission)
+                {
+                    var unwantedCharacters = ["<", ">", "!"];
+                    command[1] = removeUnwantedCharacters(command[1], unwantedCharacters);
+                    //console.log(currentMembers);
+                    //console.log(currentUserIDs);
+                    //console.log(command[2]);
+                    //console.log(command[1]);
+                    validateUser(command[1]) ? changeANickname(command) : message.reply("Please choose a valid member!");
+                }
+                break;
+                
             default:
                     message.reply("Sorry, I didnt get that...");
         }
@@ -113,10 +130,31 @@ function createARole(command) {
 function deleteARole(command)
 {
     var role = getRoleFromName(command[1]);
-    role.delete('The role needed to go')
+    role.delete()
         .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
         .catch(console.error);
-        //TO DO: Have it delete a role that is in the list of roles
+}
+
+function changeANickname(command) {
+    var changedMember = getMemberFromID(command[1]);
+
+    if (validateUserToUserNameChange(command[2]))
+    {
+        command[2] = changeNicknameToAnotherUser(command[2]);
+    }
+
+    changedMember.setNickname(command[2])
+        .then(success => currentMessage.reply(changedMember.user.username + " has been renamed to " + command[2]),
+        failure => currentMessage.reply("Sorry, I cannot change this user's nickname..."));
+}
+
+//Used if someone uses '@' they enter the name change
+function changeNicknameToAnotherUser(otherUsersNickname)
+{
+    var unwantedCharacters = ["<", ">", "!"];
+    otherUsersNickname = removeUnwantedCharacters(otherUsersNickname, unwantedCharacters);
+    (currentUserIDs.includes(otherUsersNickname)) ? otherUsersNickname = getMemberFromID(otherUsersNickname).nickname : otherUsersNickname;
+    return otherUsersNickname;
 }
 
 //Gets the actual role object, to retrieve names of roles, use getRoleNames()
@@ -134,6 +172,19 @@ function getRoles()
     return presentRoles;
 }
 
+function getAllMembers() {
+    var presentMembers = [];
+    var memberCollection = currentMessage.guild.members;
+    var keysToMembers = memberCollection.keyArray();
+    var numberOfMembers = keysToMembers.length;
+
+    for (i = 0; i < numberOfMembers; ++i)
+    {
+        presentMembers.push((memberCollection.get(keysToMembers[i])));
+    }
+    return presentMembers;
+}
+
 function getRoleNames()
 {
     var presentRoleNames = [];
@@ -144,28 +195,40 @@ function getRoleNames()
     return presentRoleNames;
 }
 
-//Used to check if the author of the message has the correct permission to manange roles
-function validateAuthor(action) {
-    var author = currentMessage.member;
-    switch (action) {
-        case "MANAGE_ROLES":
-            //Params: Permission, explicit(Depreceated), Admin. Override?, Owner Override?
-            return author.hasPermission(action, false, true, true)
-            break;
-
-        default:
-            return false;
+function getUserIDs()
+{
+    var presentUserIDs = [];
+    for (i = 0; i < currentMembers.length; ++i)
+    {
+        presentUserIDs.push("@" + currentMembers[i].user.id);
     }
+    return presentUserIDs;
 }
 
-//Used to check if the color provided by the user is a valid color, if not, just set it to default
+function rolesToString()
+{
+    var roleNames = "";
+    for (i = 0; i < currentRoleNames.length; ++i)
+    {
+        (i < currentRoleNames.length - 1) ? (roleNames = roleNames + "'"+currentRoleNames[i] + "', ") : (roleNames = roleNames + "'" +currentRoleNames[i] + "'");
+    }
+    return roleNames;
+}
+
+//Used to check if the author of the message has the correct permission to manange roles
+function validateAuthor(action)
+{
+    var author = currentMessage.member;
+    //Params: Permission, explicit(Depreceated), Admin. Override?, Owner Override?
+    return author.hasPermission(action, false, true, true);
+}
+
 function validateColor(color)
 {
-    color = removeWhiteSpaceFromColor(color);
+    color = removeWhiteSpace(color);
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
 }
 
-//Used to check if the role entered by the user is a valid role
 function validateRole(role)
 {
     var doesRoleExist = false;
@@ -173,12 +236,42 @@ function validateRole(role)
     return doesRoleExist;
 }
 
-function removeWhiteSpaceFromColor(color)
+function validateUser(userID)
+{
+    var doesUserExist = false;
+    (userID) ? doesUserExist = currentUserIDs.includes(userID) : doesUserExist = false;
+    return doesUserExist;
+}
+
+function validateUserToUserNameChange(userIDInput)
+{
+    var inputtedUserID = currentUserIDs.concat(inputtedUserID);
+
+    for (i = 0; i < currentUserIDs.length; ++i)
+    {
+        inputtedUserID[i] = inputtedUserID[i].substring(1)
+        inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
+    }
+
+    return inputtedUserID.includes(userIDInput)
+}
+
+function removeWhiteSpace(color)
 {
     //The 'g' in the regex function means global, and this means
     //do not stop after the first instance of the character, find
     //all of them
      return color.replace(/\s/g, "_");
+}
+
+function removeUnwantedCharacters(word, ListOfCharactersToRemove)
+{
+    for (i = 0; i < ListOfCharactersToRemove.length; ++i)
+    {
+        var regexExpression = new RegExp(ListOfCharactersToRemove[i], "g");
+        word = word.replace(regexExpression,"");
+    }
+    return word;
 }
 
 //Used to 'map' the color decimal value to the string value
@@ -188,12 +281,16 @@ function getColorName(decimal)
     return COLOR_NAMES[index].toLowerCase().replace(/_/g, " ");
 }
 
-//Used to 'map' the role name to the role object
 function getRoleFromName(roleName)
 {
     var index = currentRoleNames.findIndex(element => element === roleName);
     return currentRoles[index];
 }
 
-//Login the bot using the token generated from discord
+function getMemberFromID(userTag)
+{
+    var index = currentUserIDs.findIndex(element => element === userTag);
+    return currentMembers[index];
+}
+
 bot.login(Token);
