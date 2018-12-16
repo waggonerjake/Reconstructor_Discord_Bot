@@ -1,7 +1,12 @@
 /*
     Goal: Manage Roles, Nicknames, and Channels. Be able to change nicknames based on roles, change
     role names, change the nickname of anyone, autoplace new members into roles, and
-    add new roles/channles and delete roles/channels.
+    add new roles/channels and delete roles/channels.
+
+    Completed:
+    Add/Delete Roles
+    Change Role Names
+    Change any nickname
 */
 
 //Require Discord.js
@@ -23,7 +28,6 @@ var currentRoleNames = [];
 var currentMembers = [];
 var currentUserIDs = [];
 
-//Login token
 const Token = ""; 
 
 const prefix = "//"
@@ -31,7 +35,7 @@ const prefix = "//"
 //Creating the actual bot
 var bot = new Discord.Client();
 
-//When the bot is first activated, say "Ready" in the console
+//When the bot is first activated
 bot.on("ready", startUp =>
 {
     console.log("Remove Token!");
@@ -48,7 +52,6 @@ bot.on("message", message => {
 
     if (message.content.startsWith(prefix))
     {
-        //Setting member variable to the last sent message
         currentMessage = message;
 
         currentRoles = getRoles();
@@ -96,12 +99,21 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_NICKNAMES");
                 if (doesUserHavePermission)
                 {
-                    var unwantedCharacters = ["<", ">", "!"];
+                    var unwantedCharacters = ["<", ">", "!"]; //When you @someone, there is a <@!ID>, so we remove the <> and !
                     command[1] = removeUnwantedCharacters(command[1], unwantedCharacters);
                     validateUser(command[1]) ? changeANickname(command) : message.reply("Please choose a valid member!");
                 }
                 break;
-                
+
+            case "rename role":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_ROLES");
+                if (doesUserHavePermission)
+                {
+                    validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
+                }
+                break;
+
             default:
                     message.reply("Sorry, I didnt get that...");
         }
@@ -120,7 +132,7 @@ function getRoles()
     var keysToRoles = roleCollection.keyArray();
     var numberOfRoles = keysToRoles.length;
 
-    for (i = 1; i < numberOfRoles; ++i)
+    for (i = 1; i < numberOfRoles; ++i) //Starts @ 1 instead of 0 to not include the '@everyone' role
     {
         presentRoles.push(roleCollection.get(keysToRoles[i]));
     }
@@ -190,8 +202,8 @@ function createARole(command)
             name: command[1],
             color: command[2].toUpperCase()
         })
-        .then(role => currentMessage.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
-        .catch(console.error);
+        .then(success => currentMessage.reply(util.format("Created role with name \'%s\' and with color \'%s\'", success.name, getColorName(success.color))),
+        failure => currentMessage.reply("Could not create this role."))
 }
 
 //Used to 'map' the color decimal value to the string value
@@ -211,18 +223,10 @@ function validateRole(role)
 function deleteARole(command)
 {
     var role = getRoleFromName(command[1].toLowerCase());
-    var isBotRole = role.managed;
 
-    if (isBotRole)
-    {
-        currentMessage.reply("You cannot delete this role.");
-    }
-    else
-    {
-        role.delete()
-            .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
-            .catch(console.error);
-    }
+    role.delete()
+        .then(success => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", success.name)),
+        failure => currentMessage.reply("You cannot delete this role."));
 }
 
 function getRoleFromName(roleName)
@@ -303,6 +307,17 @@ function createListOfUserInputtedIDs()
     }
 
     return inputtedUserID;
+}
+
+function changeRoleName(command)
+{
+    var currentRole = getRoleFromName(command[1].toLowerCase());
+    var previousRoleName = command[1];
+    var nameToChangeTo = command[2];
+
+    currentRole.setName(nameToChangeTo)
+        .then(success => currentMessage.reply(util.format("Change the name of role \'%s\' to \'%s\'", previousRoleName, nameToChangeTo)),
+        failure => currentMessage.reply("Cannot renanme that role."));
 }
 
 bot.login(Token);
