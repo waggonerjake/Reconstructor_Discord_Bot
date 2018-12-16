@@ -80,8 +80,6 @@ bot.on("message", message => {
             case "delete role":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
-                //console.log(currentRoles);
-                //console.log(currentRoleNames);
                 if (doesUserHavePermission)
                 {
                     validateRole(command[1]) ? deleteARole(command) : message.reply("Please choose a valid role!");
@@ -89,7 +87,7 @@ bot.on("message", message => {
                 break;
 
             case "show roles":
-                message.reply(rolesToString() + "are the current roles");
+                message.reply(rolesToString() + " are the current roles");
                 break;
 
             case "change nickname":
@@ -99,10 +97,6 @@ bot.on("message", message => {
                 {
                     var unwantedCharacters = ["<", ">", "!"];
                     command[1] = removeUnwantedCharacters(command[1], unwantedCharacters);
-                    //console.log(currentMembers);
-                    //console.log(currentUserIDs);
-                    //console.log(command[2]);
-                    //console.log(command[1]);
                     validateUser(command[1]) ? changeANickname(command) : message.reply("Please choose a valid member!");
                 }
                 break;
@@ -116,46 +110,6 @@ bot.on("message", message => {
         }
     }
 });
-
-function createARole(command) {
-    currentMessage.guild.createRole(
-        {
-            name: command[1],
-            color: command[2].toUpperCase()
-        })
-        .then(role => currentMessage.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
-        .catch(console.error);
-}
-
-function deleteARole(command)
-{
-    var role = getRoleFromName(command[1]);
-    role.delete()
-        .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
-        .catch(console.error);
-}
-
-function changeANickname(command) {
-    var changedMember = getMemberFromID(command[1]);
-
-    if (validateUserToUserNameChange(command[2]))
-    {
-        command[2] = changeNicknameToAnotherUser(command[2]);
-    }
-
-    changedMember.setNickname(command[2])
-        .then(success => currentMessage.reply(changedMember.user.username + " has been renamed to " + command[2]),
-        failure => currentMessage.reply("Sorry, I cannot change this user's nickname..."));
-}
-
-//Used if someone uses '@' they enter the name change
-function changeNicknameToAnotherUser(otherUsersNickname)
-{
-    var unwantedCharacters = ["<", ">", "!"];
-    otherUsersNickname = removeUnwantedCharacters(otherUsersNickname, unwantedCharacters);
-    (currentUserIDs.includes(otherUsersNickname)) ? otherUsersNickname = getMemberFromID(otherUsersNickname).nickname : otherUsersNickname;
-    return otherUsersNickname;
-}
 
 //Gets the actual role object, to retrieve names of roles, use getRoleNames()
 function getRoles()
@@ -172,7 +126,18 @@ function getRoles()
     return presentRoles;
 }
 
-function getAllMembers() {
+function getRoleNames()
+{
+    var presentRoleNames = [];
+    for (i = 0; i < currentRoles.length; ++i)
+    {
+        presentRoleNames.push(currentRoles[i].name.toLowerCase());
+    }
+    return presentRoleNames;
+}
+
+function getAllMembers()
+{
     var presentMembers = [];
     var memberCollection = currentMessage.guild.members;
     var keysToMembers = memberCollection.keyArray();
@@ -185,16 +150,6 @@ function getAllMembers() {
     return presentMembers;
 }
 
-function getRoleNames()
-{
-    var presentRoleNames = [];
-    for (i = 0; i < currentRoles.length; ++i)
-    {
-        presentRoleNames.push(currentRoles[i].name.toLowerCase());
-    }
-    return presentRoleNames;
-}
-
 function getUserIDs()
 {
     var presentUserIDs = [];
@@ -205,17 +160,6 @@ function getUserIDs()
     return presentUserIDs;
 }
 
-function rolesToString()
-{
-    var roleNames = "";
-    for (i = 0; i < currentRoleNames.length; ++i)
-    {
-        (i < currentRoleNames.length - 1) ? (roleNames = roleNames + "'"+currentRoleNames[i] + "', ") : (roleNames = roleNames + "'" +currentRoleNames[i] + "'");
-    }
-    return roleNames;
-}
-
-//Used to check if the author of the message has the correct permission to manange roles
 function validateAuthor(action)
 {
     var author = currentMessage.member;
@@ -229,49 +173,23 @@ function validateColor(color)
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
 }
 
-function validateRole(role)
-{
-    var doesRoleExist = false;
-    (role) ? doesRoleExist = currentRoleNames.includes(role.toLowerCase()) : doesRoleExist = false;
-    return doesRoleExist;
-}
-
-function validateUser(userID)
-{
-    var doesUserExist = false;
-    (userID) ? doesUserExist = currentUserIDs.includes(userID) : doesUserExist = false;
-    return doesUserExist;
-}
-
-function validateUserToUserNameChange(userIDInput)
-{
-    var inputtedUserID = currentUserIDs.concat(inputtedUserID);
-
-    for (i = 0; i < currentUserIDs.length; ++i)
-    {
-        inputtedUserID[i] = inputtedUserID[i].substring(1)
-        inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
-    }
-
-    return inputtedUserID.includes(userIDInput)
-}
-
-function removeWhiteSpace(color)
+function removeWhiteSpace(word)
 {
     //The 'g' in the regex function means global, and this means
     //do not stop after the first instance of the character, find
     //all of them
-     return color.replace(/\s/g, "_");
+    return word.replace(/\s/g, "_");
 }
 
-function removeUnwantedCharacters(word, ListOfCharactersToRemove)
+function createARole(command)
 {
-    for (i = 0; i < ListOfCharactersToRemove.length; ++i)
-    {
-        var regexExpression = new RegExp(ListOfCharactersToRemove[i], "g");
-        word = word.replace(regexExpression,"");
-    }
-    return word;
+    currentMessage.guild.createRole(
+        {
+            name: command[1],
+            color: command[2].toUpperCase()
+        })
+        .then(role => currentMessage.reply(util.format("Created role with name \'%s\' and with color \'%s\'", role.name, getColorName(role.color))))
+        .catch(console.error);
 }
 
 //Used to 'map' the color decimal value to the string value
@@ -281,16 +199,99 @@ function getColorName(decimal)
     return COLOR_NAMES[index].toLowerCase().replace(/_/g, " ");
 }
 
+function validateRole(role)
+{
+    var doesRoleExist = false;
+    (role) ? doesRoleExist = currentRoleNames.includes(role.toLowerCase()) : doesRoleExist = false;
+    return doesRoleExist;
+}
+
+function deleteARole(command)
+{
+    var role = getRoleFromName(command[1]);
+    role.delete()
+        .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
+        .catch(console.error);
+}
+
 function getRoleFromName(roleName)
 {
     var index = currentRoleNames.findIndex(element => element === roleName);
     return currentRoles[index];
 }
 
+function rolesToString()
+{
+    var roleNames = "";
+    for (i = 0; i < currentRoleNames.length; ++i)
+    {
+        (i < currentRoleNames.length - 1) ? (roleNames = roleNames + "'" + currentRoleNames[i] + "', ") : (roleNames = roleNames + "'" + currentRoleNames[i] + "'");
+    }
+    return roleNames;
+}
+
+function removeUnwantedCharacters(word, ListOfCharactersToRemove)
+{
+    for (i = 0; i < ListOfCharactersToRemove.length; ++i)
+    {
+        var regexExpression = new RegExp(ListOfCharactersToRemove[i], "g");
+        word = word.replace(regexExpression, "");
+    }
+    return word;
+}
+
+function validateUser(userID)
+{
+    var doesUserExist = false;
+    (userID) ? doesUserExist = currentUserIDs.includes(userID) : doesUserExist = false;
+    return doesUserExist;
+}
+
+function changeANickname(command)
+{
+    var changedMember = getMemberFromID(command[1]);
+
+    if (validateUserToUserNameChange(command[2]))
+    {
+        command[2] = changeNicknameToAnotherUser(command[2]);
+    }
+
+    changedMember.setNickname(command[2])
+        .then(success => currentMessage.reply(changedMember.user.username + " has been renamed to " + command[2]),
+        failure => currentMessage.reply("Sorry, I cannot change this user's nickname..."));
+}
+
 function getMemberFromID(userTag)
 {
     var index = currentUserIDs.findIndex(element => element === userTag);
     return currentMembers[index];
+}
+
+//Used if someone uses '@' they enter the name change
+function changeNicknameToAnotherUser(otherUsersNickname)
+{
+    var unwantedCharacters = ["<", ">", "!"];
+    otherUsersNickname = removeUnwantedCharacters(otherUsersNickname, unwantedCharacters);
+    (currentUserIDs.includes(otherUsersNickname)) ? otherUsersNickname = getMemberFromID(otherUsersNickname).nickname : otherUsersNickname;
+    return otherUsersNickname;
+}
+
+function validateUserToUserNameChange(userIDInput)
+{
+    return createListOfUserInputtedIDs().includes(userIDInput)
+}
+
+function createListOfUserInputtedIDs()
+{
+    var inputtedUserID = currentUserIDs.concat(inputtedUserID);
+
+    for (i = 0; i < currentUserIDs.length; ++i)
+    {
+        inputtedUserID[i] = inputtedUserID[i].substring(1)
+        inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
+    }
+
+    return inputtedUserID;
 }
 
 bot.login(Token);
