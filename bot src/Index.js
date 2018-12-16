@@ -83,6 +83,7 @@ bot.on("message", message => {
                 if (doesUserHavePermission)
                 {
                     validateRole(command[1]) ? deleteARole(command) : message.reply("Please choose a valid role!");
+
                 }
                 break;
 
@@ -123,6 +124,7 @@ function getRoles()
     {
         presentRoles.push(roleCollection.get(keysToRoles[i]));
     }
+
     return presentRoles;
 }
 
@@ -208,10 +210,19 @@ function validateRole(role)
 
 function deleteARole(command)
 {
-    var role = getRoleFromName(command[1]);
-    role.delete()
-        .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
-        .catch(console.error);
+    var role = getRoleFromName(command[1].toLowerCase());
+    var isBotRole = role.managed;
+
+    if (isBotRole)
+    {
+        currentMessage.reply("You cannot delete this role.");
+    }
+    else
+    {
+        role.delete()
+            .then(deleted => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", deleted.name)))
+            .catch(console.error);
+    }
 }
 
 function getRoleFromName(roleName)
