@@ -1,8 +1,6 @@
-# Reconstructor_Discord_Bot
+# What is the 'Reconstructor' bot?
+This bot allows the user to change nicknames, add and delete roles, and add and delete channels.
+# How do I use this bot?
 
-Make sure to install node.js
 
-Create a folder with the exact things from the repo
-
-to run the bot, use 'node Index' within a cmd/powershell prompt in the folders directory (shift r-click to open powershell)
 
