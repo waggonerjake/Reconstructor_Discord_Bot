@@ -6,7 +6,8 @@
     Completed:
     Add/Delete Roles
     Change Role Names
-    Change any nickname
+    Change Role Colors
+    Change Any Nickname
 */
 
 //Require Discord.js
@@ -41,6 +42,12 @@ bot.on("ready", startUp =>
     console.log("Remove Token!");
 });
 
+//When a new member joins the server
+bot.on("guildMemberAdd", newMember =>
+{
+    var currentGuild = newMember.guild;
+    newMember.send("You have joined the '" + currentGuild.name + "' server.");
+});
 
 //When we recieve a message, do this function
 bot.on("message", message => {
@@ -75,7 +82,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    (command[2]) ? (command[2] = validateColor(command[2])) : (command[2] = 'DEFAULT');
+                    (command[2]) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
                     createARole(command);
                 }
                 break;
@@ -114,6 +121,16 @@ bot.on("message", message => {
                 }
                 break;
 
+            case "change role color":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_ROLES");
+                if (doesUserHavePermission)
+                {
+                    command[2] = setCorrectColor(command[2]).toLowerCase();
+                    validateRole(command[1]) ? changeRoleColor(command) : message.reply("Please choose a valid role!");
+                }
+                break;
+
             default:
                     message.reply("Sorry, I didnt get that...");
         }
@@ -128,7 +145,7 @@ bot.on("message", message => {
 function getRoles()
 {
     var presentRoles = [];
-    var roleCollection = currentMessage.guild.roles;
+    var roleCollection = currentMessage.guild.roles
     var keysToRoles = roleCollection.keyArray();
     var numberOfRoles = keysToRoles.length;
 
@@ -181,7 +198,7 @@ function validateAuthor(action)
     return author.hasPermission(action, false, true, true);
 }
 
-function validateColor(color)
+function setCorrectColor(color)
 {
     color = removeWhiteSpace(color);
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
@@ -316,8 +333,17 @@ function changeRoleName(command)
     var nameToChangeTo = command[2];
 
     currentRole.setName(nameToChangeTo)
-        .then(success => currentMessage.reply(util.format("Change the name of role \'%s\' to \'%s\'", previousRoleName, nameToChangeTo)),
+        .then(success => currentMessage.reply(util.format("Changed the name of role \'%s\' to \'%s\'", previousRoleName, nameToChangeTo)),
         failure => currentMessage.reply("Cannot renanme that role."));
+}
+
+function changeRoleColor(command)
+{
+    var roleBeingChanged = getRoleFromName(command[1].toLowerCase());
+
+    roleBeingChanged.setColor(command[2].toUpperCase())
+        .then(success => currentMessage.reply(util.format("Changed the color of \'%s'\ to \'%s\'", command[1], command[2])),
+        failure => currentMessage.reply("Cannot change the color of that role."));
 }
 
 bot.login(Token);
