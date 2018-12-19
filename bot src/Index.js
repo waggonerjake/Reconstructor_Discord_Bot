@@ -8,6 +8,7 @@
     Change Role Names
     Change Role Colors
     Change Any Nickname
+    Autoplace Members into Roles
 */
 
 //Require Discord.js
@@ -23,6 +24,7 @@ const COLOR_NUMBERS = [0, 1752220, 3066993, 3447003, 10181046, 15277667, 1584436
     11342935, 12745742, 11027200, 10038562, 9936031, 12370112, 2899536];
 
 var currentMessage;
+var autoAssignedRole;
 
 var currentRoles = [];
 var currentRoleNames = [];
@@ -47,7 +49,22 @@ bot.on("guildMemberAdd", newMember =>
 {
     var currentGuild = newMember.guild;
     newMember.send("You have joined the '" + currentGuild.name + "' server.");
+
+    autoAssignNewMember(newMember);
 });
+
+function autoAssignNewMember(newMember)
+{
+    var currentGuild = newMember.guild;
+
+    if (validateRole(autoAssignedRole))
+    {
+        var automaticRole = currentGuild.roles.find(role => role.name === autoAssignedRole);
+        newMember.addRole(automaticRole)
+            .then(success => newMember.send("You have also been autoplaced in the " + autoAssignedRole + " role."),
+            failure => currentGuild.owner.send("There is no autoassigned role set yet!"));
+    }
+}
 
 //When we recieve a message, do this function
 bot.on("message", message => {
@@ -131,6 +148,26 @@ bot.on("message", message => {
                 }
                 break;
 
+            case "set autoassign role":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_ROLES");
+                if (doesUserHavePermission)
+                {
+                    (validateRole(command[1])) ? setAutoRole(command) : message.reply("Please choose a valid role!");
+                }
+                break;
+
+            case "show autoassign role":
+                try
+                {
+                    message.reply("The autoassign role is: '" + autoAssignedRole.toLowerCase() + "'.");
+                }
+                catch (err)
+                {
+                    message.reply("There is no autoassign role yet.");
+                }
+                break;
+
             default:
                     message.reply("Sorry, I didnt get that...");
         }
@@ -149,7 +186,7 @@ function getRoles()
     var keysToRoles = roleCollection.keyArray();
     var numberOfRoles = keysToRoles.length;
 
-    for (i = 1; i < numberOfRoles; ++i) //Starts @ 1 instead of 0 to not include the '@everyone' role
+    for (i = 1; i < numberOfRoles; ++i) //Starts @ 1 instead of 0 to exclude the '@everyone' role
     {
         presentRoles.push(roleCollection.get(keysToRoles[i]));
     }
@@ -344,6 +381,12 @@ function changeRoleColor(command)
     roleBeingChanged.setColor(command[2].toUpperCase())
         .then(success => currentMessage.reply(util.format("Changed the color of \'%s'\ to \'%s\'", command[1], command[2])),
         failure => currentMessage.reply("Cannot change the color of that role."));
+}
+
+function setAutoRole(command)
+{
+    autoAssignedRole = command[1];
+    currentMessage.reply(command[1] + " has been set as the auto assigned role.");
 }
 
 bot.login(Token);
