@@ -94,17 +94,24 @@ bot.on("message", message => {
                 message.reply("Testing! Testing! 1...2...3");
                 break;
 
-            case "create role":
+            case "crro":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    (command[2]) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
-                    createARole(command);
+                    if (validateRoleName(command[1]))
+                    {
+                        (command[2]) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
+                        createARole(command);
+                    }
+                    else
+                    {
+                        message.reply("Pleae choose a valid name for the role!");
+                    }
                 }
                 break;
 
-            case "delete role":
+            case "dero":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
@@ -114,11 +121,11 @@ bot.on("message", message => {
                 }
                 break;
 
-            case "show roles":
+            case "shro":
                 message.reply(rolesToString() + " are the current roles");
                 break;
 
-            case "change nickname":
+            case "chnn":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_NICKNAMES");
                 if (doesUserHavePermission)
@@ -129,7 +136,7 @@ bot.on("message", message => {
                 }
                 break;
 
-            case "rename role":
+            case "rero":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
@@ -138,7 +145,7 @@ bot.on("message", message => {
                 }
                 break;
 
-            case "change role color":
+            case "chroco":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
@@ -148,16 +155,16 @@ bot.on("message", message => {
                 }
                 break;
 
-            case "set autoassign role":
+            case "aaro":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    (validateRole(command[1])) ? setAutoRole(command) : message.reply("Please choose a valid role!");
+                    validateRole(command[1]) ? setAutoRole(command) : message.reply("Please choose a valid role!");
                 }
                 break;
 
-            case "show autoassign role":
+            case "shaaro":
                 try
                 {
                     message.reply("The autoassign role is: '" + autoAssignedRole.toLowerCase() + "'.");
@@ -235,13 +242,37 @@ function validateAuthor(action)
     return author.hasPermission(action, false, true, true);
 }
 
+function validateRoleName(name)
+{
+    var isRoleValid = false;
+    name = name.replace(/\s/g, "");
+    (name === "") ? isRoleValid = false : isRoleValid = true;
+    return isRoleValid;
+}
+
 function setCorrectColor(color)
 {
-    color = removeWhiteSpace(color);
+    color = switchWhiteSpaceWithUnderscore(color);
+    color = validatePink(color);
     return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
 }
 
-function removeWhiteSpace(word)
+function validatePink(color)
+{
+    if (!COLOR_NAMES.includes(color.toUpperCase()) && color.includes("pink") && !color.includes("dark"))
+    {
+        color = "LUMINOUS_VIVID_PINK";
+    }
+
+    if (!COLOR_NAMES.includes(color.toUpperCase()) && color.includes("pink") && color.includes("dark"))
+    {
+        color = "DARK_VIVID_PINK";
+    }
+
+    return color;
+}
+
+function switchWhiteSpaceWithUnderscore(word)
 {
     //The 'g' in the regex function means global, and this means
     //do not stop after the first instance of the character, find
