@@ -141,7 +141,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
+                    if (validateRoleName(command[2]))
+                    {
+                        validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name to rename this role to!");
+                    }
                 }
                 break;
 
@@ -242,6 +249,7 @@ function validateAuthor(action)
     return author.hasPermission(action, false, true, true);
 }
 
+//Check if the role is blank
 function validateRoleName(name)
 {
     var isRoleValid = false;
@@ -350,15 +358,24 @@ function validateUser(userID)
 function changeANickname(command)
 {
     var changedMember = getMemberFromID(command[1]);
+    var newNickname = command[2];
+    var unwantedCharacters = ["<", ">"];
 
-    if (validateUserToUserNameChange(command[2]))
+    if (validateUserToUserNameChange(newNickname))
     {
-        command[2] = changeNicknameToAnotherUser(command[2]);
+        newNickname = changeNicknameToAnotherUser(newNickname);
     }
 
-    changedMember.setNickname(command[2])
-        .then(success => currentMessage.reply(changedMember.user.username + " has been renamed to " + command[2]),
-        failure => currentMessage.reply("Sorry, I cannot change this user's nickname..."));
+    command[2] = removeUnwantedCharacters(command[2], unwantedCharacters)
+
+    if (currentUserIDs.includes(command[2]))
+    {
+        return currentMessage.reply("Sorry, the user you are copying the nickname from does not have a nickname.");
+    }
+
+        changedMember.setNickname(newNickname)
+            .then(success => currentMessage.reply(changedMember.user.username + " has been renamed to " + newNickname),
+            failure => currentMessage.reply("Sorry, I cannot change this user's nickname..."));
 }
 
 function getMemberFromID(userTag)
@@ -387,7 +404,7 @@ function createListOfUserInputtedIDs()
 
     for (i = 0; i < currentUserIDs.length; ++i)
     {
-        inputtedUserID[i] = inputtedUserID[i].substring(1)
+        inputtedUserID[i] = inputtedUserID[i].substring(1) //Cuts off @ sign of the id
         inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
     }
 
