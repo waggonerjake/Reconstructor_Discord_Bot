@@ -34,7 +34,7 @@ The first property is the name of the role the user wishes to delete. If no name
 //shro
 #### Description:
 Allows the user to show all the roles that are available in the server.
-### Permission:
+#### Permission:
 Does not require special permissions.
 #### Properties and Usage:
 Example: //shro
@@ -45,7 +45,7 @@ There are no extra properties, only the command exists.
 //chnn, @USER TO BE CHANGED, NAME TO CHANGE TO
 #### Description:
 Allows the user to change any user's nickname (with respect to role placement, if any).
-### Permission:
+#### Permission:
 Must have either be able to **manage nicknames** or be an **administrator**. *Does not allow changing of the server owner's nickname.*
 #### Properties and Usage:
 Example: //chnn, @fakeusername, moderator
@@ -59,7 +59,7 @@ The second property can be either the name of you would like to change it to, or
 //rero, ROLE TO BE RENAMED, NEW NAME
 #### Description:
 Allows the user to rename a *valid* role in the server, (with respect to role placement, if any).
-### Permission:
+#### Permission:
 Must have either be able to **manage roles** or be an **administrator**.
 #### Properties and Usage:
 Example: //rero, New Role, Even Newer Role
@@ -71,7 +71,7 @@ The second property is the new name you'd like to give to that role. If no name 
 //chroco, ROLE NAME, NEW ROLE COLOR
 #### Description:
 Allows the user to change the current color of an exsisting role in the server.
-### Permission:
+#### Permission:
 Must have either be able to **manage roles** or be an **administrator**.
 #### Properties and Usage:
 Example: //chroco, New Role, blue
@@ -80,24 +80,24 @@ The first property is the *existing* role's name that you would like to change t
 ##### Acceptable Colors: 
 default, aqua, green, blue, purple, pink, gold, red, grey, darker grey, navy, dark aqua, dark green, dark blue, dark purple, dark pink, dark gold, dark orange, dark red, light grey, and dark navy.
 ## Set AutoAssign Role
-### Command:
+#### Command:
 //aaro, ROLE NAME
-### Description:
+#### Description:
 Allows the user to set the autoassign role, so when a new user joins the server, they will be automatically placed into this role.
-### Permission:
+#### Permission:
 Must have either be able to **manage roles** or be an **administrator**.
-### Properties and Usage:
+#### Properties and Usage:
 Example: //aaro, New Role
 
 The first property is the *existing* role name that you would like to be the auto assign role. If no name or an invalid name is given, no role will be set as the auto assign role.
 ## Show Auto Assign Role:
-### Command:
+#### Command:
 //shaaro
-### Description:
+#### Description:
 Allows the user to show the auto assign role name.
-### Permission:
+#### Permission:
 Does not require special permissions.
-### Properties and Usage:
+#### Properties and Usage:
 Example: //shaaro
 
 There are no extra properties, only the command exists.
