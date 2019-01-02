@@ -31,7 +31,7 @@ var currentRoleNames = [];
 var currentMembers = [];
 var currentUserIDs = [];
 
-const Token = ""; 
+const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DseOEQ.QP_THfvEdNN0kAUN5E_7NlB3fJo"; 
 
 const prefix = "//"
 
@@ -155,10 +155,16 @@ bot.on("message", message => {
             case "chroco":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
-                if (doesUserHavePermission)
-                {
-                    command[2] = setCorrectColor(command[2]).toLowerCase();
-                    validateRole(command[1]) ? changeRoleColor(command) : message.reply("Please choose a valid role!");
+                if (doesUserHavePermission) {
+                    if (command[2])
+                    {
+                        command[2] = setCorrectColor(command[2]);
+                        validateRole(command[1]) ? changeRoleColor(command) : message.reply("Please choose a valid role!");
+                    }
+                    else
+                    {
+                        message.reply("Please enter a color!");
+                    }
                 }
                 break;
 
@@ -267,6 +273,8 @@ function setCorrectColor(color)
 
 function validatePink(color)
 {
+    color = color.toLowerCase();
+
     if (!COLOR_NAMES.includes(color.toUpperCase()) && color.includes("pink") && !color.includes("dark"))
     {
         color = "LUMINOUS_VIVID_PINK";
@@ -276,6 +284,8 @@ function validatePink(color)
     {
         color = "DARK_VIVID_PINK";
     }
+
+    color = color.toUpperCase();
 
     return color;
 }
@@ -425,9 +435,10 @@ function changeRoleName(command)
 function changeRoleColor(command)
 {
     var roleBeingChanged = getRoleFromName(command[1].toLowerCase());
+    var newColorName = command[2].toLowerCase().replace(/_/g, " ");
 
-    roleBeingChanged.setColor(command[2].toUpperCase())
-        .then(success => currentMessage.reply(util.format("Changed the color of \'%s'\ to \'%s\'", command[1], command[2])),
+    roleBeingChanged.setColor(command[2])
+        .then(success => currentMessage.reply(util.format("Changed the color of \'%s'\ to \'%s\'", command[1], newColorName)),
         failure => currentMessage.reply("Cannot change the color of that role."));
 }
 
