@@ -31,7 +31,7 @@ var currentRoleNames = [];
 var currentMembers = [];
 var currentUserIDs = [];
 
-const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DseOEQ.QP_THfvEdNN0kAUN5E_7NlB3fJo"; 
+const Token = "";
 
 const prefix = "//"
 
