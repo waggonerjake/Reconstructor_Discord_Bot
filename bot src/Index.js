@@ -9,6 +9,10 @@
     Change Role Colors
     Change Any Nickname
     Autoplace Members into Roles
+    Rename Roles
+    Change role colors
+    Add Channels
+    Delete Channels
 */
 
 //Require Discord.js
@@ -26,8 +30,6 @@ const COLOR_NUMBERS = [0, 1752220, 3066993, 3447003, 10181046, 15277667, 1584436
 var currentMessage;
 var autoAssignedRole;
 
-var currentRoles = [];
-var currentRoleNames = [];
 var currentMembers = [];
 var currentUserIDs = [];
 
@@ -78,8 +80,6 @@ bot.on("message", message => {
     {
         currentMessage = message;
 
-        currentRoles = getRoles();
-        currentRoleNames = getRoleNames();
         currentMembers = getAllMembers();
         currentUserIDs = getUserIDs();
 
@@ -99,7 +99,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    if (validateRoleName(command[1]))
+                    if (validateName(command[1]))
                     {
                         (command[2]) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
                         createARole(command);
@@ -116,7 +116,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    validateRole(command[1]) ? deleteARole(command) : message.reply("Please choose a valid role!");
+                    validateRole(command[1]) ? deleteARole(command[1]) : message.reply("Please choose a valid role!");
 
                 }
                 break;
@@ -141,7 +141,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    if (validateRoleName(command[2]))
+                    if (validateName(command[2]))
                     {
                         validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
                     }
@@ -173,7 +173,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission)
                 {
-                    validateRole(command[1]) ? setAutoRole(command) : message.reply("Please choose a valid role!");
+                    validateRole(command[1]) ? setAutoRole(command[1]) : message.reply("Please choose a valid role!");
                 }
                 break;
 
@@ -188,8 +188,44 @@ bot.on("message", message => {
                 }
                 break;
 
+            case "crtech":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    validateName(command[1]) ? createChannelType(command[1], "text") : message.reply("Please choose a valid name!");
+                }
+                break;
+
+            case "crvoch":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    validateName(command[1]) ? createChannelType(command[1], "voice") : message.reply("Please choose a valid name!");
+                }
+                break;
+
+            case "crcat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    validateName(command[1]) ? createChannelType(command[1], "category") : message.reply("Please choose a valid name!");
+                }
+                break;
+
+            case "dech":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    validateChannel(command[1]) ? deleteChannel(command[1]) : message.reply("Please choose a valid channel!");
+                }
+                break;
+
             default:
-                    message.reply("Sorry, I didnt get that...");
+                    message.reply("Sorry, I didnt understand that.");
         }
         if (!doesUserHavePermission && tryingToCommand)
         {
@@ -197,32 +233,6 @@ bot.on("message", message => {
         }
     }
 });
-
-//Gets the actual role object, to retrieve names of roles, use getRoleNames()
-function getRoles()
-{
-    var presentRoles = [];
-    var roleCollection = currentMessage.guild.roles
-    var keysToRoles = roleCollection.keyArray();
-    var numberOfRoles = keysToRoles.length;
-
-    for (i = 1; i < numberOfRoles; ++i) //Starts @ 1 instead of 0 to exclude the '@everyone' role
-    {
-        presentRoles.push(roleCollection.get(keysToRoles[i]));
-    }
-
-    return presentRoles;
-}
-
-function getRoleNames()
-{
-    var presentRoleNames = [];
-    for (i = 0; i < currentRoles.length; ++i)
-    {
-        presentRoleNames.push(currentRoles[i].name.toLowerCase());
-    }
-    return presentRoleNames;
-}
 
 function getAllMembers()
 {
@@ -256,12 +266,41 @@ function validateAuthor(action)
 }
 
 //Check if the role is blank
-function validateRoleName(name)
+function validateName(name)
 {
     var isRoleValid = false;
-    name = name.replace(/\s/g, "");
+
+    try
+    {
+        name = name.replace(/\s/g, "");
+    }
+    catch (err)
+    {
+        return false;
+    }
+
     (name === "") ? isRoleValid = false : isRoleValid = true;
     return isRoleValid;
+}
+
+function validateRole(role)
+{
+    var doesRoleExist = false;
+    var currentRoles = currentMessage.guild.roles;
+    (role) ? doesRoleExist = currentRoles.find(element => element.name.toLowerCase() === role.toLowerCase()) : doesRoleExist = false;
+    return doesRoleExist;
+}
+
+function validateUser(userID)
+{
+    var doesUserExist = false;
+    (userID) ? doesUserExist = currentUserIDs.includes(userID) : doesUserExist = false;
+    return doesUserExist;
+}
+
+function validateUserToUserNameChange(userIDInput)
+{
+    return createListOfUserInputtedIDs().includes(userIDInput)
 }
 
 function setCorrectColor(color)
@@ -290,6 +329,12 @@ function validatePink(color)
     return color;
 }
 
+function validateChannel(channel)
+{
+    var validChannels = currentMessage.guild.channels;
+    return Boolean(validChannels.find(element => element.name === channel));
+}
+
 function switchWhiteSpaceWithUnderscore(word)
 {
     //The 'g' in the regex function means global, and this means
@@ -316,53 +361,14 @@ function getColorName(decimal)
     return COLOR_NAMES[index].toLowerCase().replace(/_/g, " ");
 }
 
-function validateRole(role)
+function deleteARole(roleName)
 {
-    var doesRoleExist = false;
-    (role) ? doesRoleExist = currentRoleNames.includes(role.toLowerCase()) : doesRoleExist = false;
-    return doesRoleExist;
-}
+    var currentRoles = currentMessage.guild.roles
+    var roleToDelete = currentRoles.find(element => element.name.toLowerCase() === roleName.toLowerCase());
 
-function deleteARole(command)
-{
-    var role = getRoleFromName(command[1].toLowerCase());
-
-    role.delete()
+    roleToDelete.delete()
         .then(success => currentMessage.reply(util.format("\'%s\' was deleted. It will be missed.", success.name)),
         failure => currentMessage.reply("You cannot delete this role."));
-}
-
-function getRoleFromName(roleName)
-{
-    var index = currentRoleNames.findIndex(element => element === roleName);
-    return currentRoles[index];
-}
-
-function rolesToString()
-{
-    var roleNames = "";
-    for (i = 0; i < currentRoleNames.length; ++i)
-    {
-        (i < currentRoleNames.length - 1) ? (roleNames = roleNames + "'" + currentRoleNames[i] + "', ") : (roleNames = roleNames + "'" + currentRoleNames[i] + "'");
-    }
-    return roleNames;
-}
-
-function removeUnwantedCharacters(word, ListOfCharactersToRemove)
-{
-    for (i = 0; i < ListOfCharactersToRemove.length; ++i)
-    {
-        var regexExpression = new RegExp(ListOfCharactersToRemove[i], "g");
-        word = word.replace(regexExpression, "");
-    }
-    return word;
-}
-
-function validateUser(userID)
-{
-    var doesUserExist = false;
-    (userID) ? doesUserExist = currentUserIDs.includes(userID) : doesUserExist = false;
-    return doesUserExist;
 }
 
 function changeANickname(command)
@@ -403,38 +409,22 @@ function changeNicknameToAnotherUser(otherUsersNickname)
     return otherUsersNickname;
 }
 
-function validateUserToUserNameChange(userIDInput)
-{
-    return createListOfUserInputtedIDs().includes(userIDInput)
-}
-
-function createListOfUserInputtedIDs()
-{
-    var inputtedUserID = currentUserIDs.concat(inputtedUserID);
-
-    for (i = 0; i < currentUserIDs.length; ++i)
-    {
-        inputtedUserID[i] = inputtedUserID[i].substring(1) //Cuts off @ sign of the id
-        inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
-    }
-
-    return inputtedUserID;
-}
-
 function changeRoleName(command)
 {
-    var currentRole = getRoleFromName(command[1].toLowerCase());
     var previousRoleName = command[1];
     var nameToChangeTo = command[2];
+    var currentRoles = currentMessage.guild.roles;
+    var roleBeingChanged = currentRoles.find(element => element.name.toLowerCase() === previousRoleName.toLowerCase());
 
-    currentRole.setName(nameToChangeTo)
+    roleBeingChanged.setName(nameToChangeTo)
         .then(success => currentMessage.reply(util.format("Changed the name of role \'%s\' to \'%s\'", previousRoleName, nameToChangeTo)),
         failure => currentMessage.reply("Cannot renanme that role."));
 }
 
 function changeRoleColor(command)
 {
-    var roleBeingChanged = getRoleFromName(command[1].toLowerCase());
+    var currentRoles = currentMessage.guild.roles;
+    var roleBeingChanged = currentRoles.find(element => element.name.toLowerCase() === command[1].toLowerCase());
     var newColorName = command[2].toLowerCase().replace(/_/g, " ");
 
     roleBeingChanged.setColor(command[2])
@@ -442,10 +432,60 @@ function changeRoleColor(command)
         failure => currentMessage.reply("Cannot change the color of that role."));
 }
 
-function setAutoRole(command)
+function setAutoRole(roleName)
 {
-    autoAssignedRole = command[1];
-    currentMessage.reply(command[1] + " has been set as the auto assigned role.");
+    autoAssignedRole = roleName;
+    currentMessage.reply(roleName + " has been set as the auto assigned role.");
+}
+
+function createChannelType(name, type)
+{
+    currentMessage.guild.createChannel(name, type)
+        .then(success => currentMessage.reply(util.format("A %s channel with the name \'%s'\ was created", type, name)),
+        failure => currentMessage.reply("Cannot create that channel."));
+}
+
+function deleteChannel(channelName)
+{
+    var validChannels = currentMessage.guild.channels;
+    var channelToDelete = validChannels.find(element => element.name === channelName);
+
+    channelToDelete.delete()
+        .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been removed", channelName)),
+        failure => currentMessage.reply("Cannot delete that channel."));
+}
+
+function rolesToString()
+{
+    var roleNames = "";
+    var currentRolesArray = currentMessage.guild.roles.array();
+    
+    for (i = 0; i < currentRolesArray.length; ++i)
+    {
+        (i < currentRolesArray.length - 1) ? (roleNames = roleNames + "'" + currentRolesArray[i].name + "', ") : (roleNames = roleNames + "'" + currentRolesArray[i].name + "'");
+    }
+    return roleNames;
+}
+
+function removeUnwantedCharacters(word, ListOfCharactersToRemove)
+{
+    for (i = 0; i < ListOfCharactersToRemove.length; ++i)
+    {
+        var regexExpression = new RegExp(ListOfCharactersToRemove[i], "g");
+        word = word.replace(regexExpression, "");
+    }
+    return word;
+}
+
+function createListOfUserInputtedIDs()
+{
+    var inputtedUserID = currentUserIDs.concat(inputtedUserID);
+
+    for (i = 0; i < currentUserIDs.length; ++i) {
+        inputtedUserID[i] = inputtedUserID[i].substring(1) //Cuts off @ sign of the id
+        inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
+    }
+    return inputtedUserID;
 }
 
 bot.login(Token);
