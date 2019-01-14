@@ -13,6 +13,11 @@
     Change role colors
     Add Channels
     Delete Channels
+    Rename Channels
+    Move channels to categories
+
+    TODO:
+    Rename all members based on role
 */
 
 //Require Discord.js
@@ -224,6 +229,23 @@ bot.on("message", message => {
                 }
                 break;
 
+            case "rech":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission) {
+                    validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel!");
+                }
+                break;
+
+            case "chcat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    setChannelCategory(command);
+                }
+                break;
+
             default:
                     message.reply("Sorry, I didnt understand that.");
         }
@@ -283,11 +305,11 @@ function validateName(name)
     return isRoleValid;
 }
 
-function validateRole(role)
+function validateRole(roleName)
 {
     var doesRoleExist = false;
     var currentRoles = currentMessage.guild.roles;
-    (role) ? doesRoleExist = currentRoles.find(element => element.name.toLowerCase() === role.toLowerCase()) : doesRoleExist = false;
+    (roleName) ? doesRoleExist = currentRoles.find(element => element.name.toLowerCase() === roleName.toLowerCase()) : doesRoleExist = false;
     return doesRoleExist;
 }
 
@@ -303,36 +325,43 @@ function validateUserToUserNameChange(userIDInput)
     return createListOfUserInputtedIDs().includes(userIDInput)
 }
 
-function setCorrectColor(color)
+function setCorrectColor(colorName)
 {
-    color = switchWhiteSpaceWithUnderscore(color);
-    color = validatePink(color);
-    return ((COLOR_NAMES.includes(color.toUpperCase()) || COLOR_NUMBERS.includes(color)) ? color : 'DEFAULT');
+    colorName = switchWhiteSpaceWithUnderscore(colorName);
+    colorName = validatePink(colorName);
+    return ((COLOR_NAMES.includes(colorName.toUpperCase()) || COLOR_NUMBERS.includes(colorName)) ? colorName : 'DEFAULT');
 }
 
-function validatePink(color)
+function validatePink(colorName)
 {
-    color = color.toLowerCase();
+    colorName = colorName.toLowerCase();
 
-    if (!COLOR_NAMES.includes(color.toUpperCase()) && color.includes("pink") && !color.includes("dark"))
+    if (!COLOR_NAMES.includes(colorName.toUpperCase()) && colorName.includes("pink") && !colorName.includes("dark"))
     {
-        color = "LUMINOUS_VIVID_PINK";
+        colorName = "LUMINOUS_VIVID_PINK";
     }
 
-    if (!COLOR_NAMES.includes(color.toUpperCase()) && color.includes("pink") && color.includes("dark"))
+    if (!COLOR_NAMES.includes(colorName.toUpperCase()) && colorName.includes("pink") && colorName.includes("dark"))
     {
-        color = "DARK_VIVID_PINK";
+        colorName = "DARK_VIVID_PINK";
     }
 
-    color = color.toUpperCase();
+    colorName = colorName.toUpperCase();
 
-    return color;
+    return colorName;
 }
 
-function validateChannel(channel)
+function validateChannel(channelName)
 {
     var validChannels = currentMessage.guild.channels;
-    return Boolean(validChannels.find(element => element.name === channel));
+    return Boolean(validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase()));
+}
+
+function validateCategory(channel)
+{
+    var isCategory = false;
+    (channel.type === "category") ? isCategory = true : isCategory = false;
+    return isCategory;
 }
 
 function switchWhiteSpaceWithUnderscore(word)
@@ -448,11 +477,50 @@ function createChannelType(name, type)
 function deleteChannel(channelName)
 {
     var validChannels = currentMessage.guild.channels;
-    var channelToDelete = validChannels.find(element => element.name === channelName);
+    var channelToDelete = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
 
     channelToDelete.delete()
         .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been removed", channelName)),
         failure => currentMessage.reply("Cannot delete that channel."));
+}
+
+function renameChannel(command)
+{
+    var validChannels = currentMessage.guild.channels;
+    var currentChannelName = command[1];
+    var channelToRename = validChannels.find(element => element.name.toLowerCase() === currentChannelName.toLowerCase());
+    var newName = command[2];
+
+    channelToRename.setName(newName)
+        .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been renamed to \'%s'\. ", currentChannelName, newName)), failure => currentMessage.reply("Cannot rename that channel."));
+}
+
+function setChannelCategory(command)
+{
+    var validChannels = currentMessage.guild.channels;
+    var channelName = command[1];
+    var categoryName = command[2];
+    var channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
+    var category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+
+
+    if (validateChannel(channelName) && validateName(channelName) && validateName(categoryName))
+    {
+        if (validateChannel(categoryName) && validateCategory(category))
+        {
+            channel.setParent(category)
+                .then(success => currentMessage.reply(util.format("Placed the channel '\%s'\ in the category '\%s'\.", channelName, categoryName)),
+                failure => currentMessage.reply("Cannot place that channel in that category."));
+        }
+        else
+        {
+            currentMessage.reply("Please choose a valid category!");
+        }
+    }
+    else
+    {
+        currentMessage.reply("Please choose a valid channel or category!")
+    }
 }
 
 function rolesToString()
