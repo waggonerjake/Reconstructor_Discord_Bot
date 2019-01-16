@@ -15,6 +15,7 @@
     Delete Channels
     Rename Channels
     Move channels to categories
+    Remove channels from category
 
     TODO:
     Rename all members based on role
@@ -232,7 +233,8 @@ bot.on("message", message => {
             case "rech":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
-                if (doesUserHavePermission) {
+                if (doesUserHavePermission)
+                {
                     validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel!");
                 }
                 break;
@@ -243,6 +245,14 @@ bot.on("message", message => {
                 if (doesUserHavePermission)
                 {
                     setChannelCategory(command);
+                }
+                break;
+
+            case "dechcat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission) {
+                    removeFromCategory(command);
                 }
                 break;
 
@@ -497,14 +507,24 @@ function renameChannel(command)
 
 function setChannelCategory(command)
 {
-    var validChannels = currentMessage.guild.channels;
-    var channelName = command[1];
-    var categoryName = command[2];
-    var channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
-    var category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+    var validChannels;
+    var channelName;
+    var categoryName;
+    var channel;
+    var category;
 
+    if (validateName(command[1]) === false || validateName(command[2]) === false)
+    {
+        return currentMessage.reply("Please choose a valid channel or category!");
+    }
 
-    if (validateChannel(channelName) && validateName(channelName) && validateName(categoryName))
+    validChannels = currentMessage.guild.channels;
+    channelName = command[1];
+    categoryName = command[2];
+    channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
+    category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+
+    if (validateChannel(channelName))
     {
         if (validateChannel(categoryName) && validateCategory(category))
         {
@@ -519,7 +539,41 @@ function setChannelCategory(command)
     }
     else
     {
-        currentMessage.reply("Please choose a valid channel or category!")
+        currentMessage.reply("Please choose a valid channel!")
+    }
+}
+
+function removeFromCategory(command)
+{
+    var validChannels;
+    var channelName;
+    var channel;
+
+    if (validateName(command[1]) === false)
+    {
+        return currentMessage.reply("Please choose a valid channel!");
+    }
+
+    validChannels = currentMessage.guild.channels;
+    channelName = command[1];
+    channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
+
+    if (validateChannel(channelName))
+    {
+        if (channel.parent !== null)
+        {
+            channel.setParent(null)
+                .then(success => currentMessage.reply(util.format("Placed the channel '\%s'\ back at the top.", channelName)),
+                failure => currentMessage.reply("Cannot remove that channel from that category."));
+        }
+        else
+        {
+            currentMessage.reply(util.format("The channel '\%s'\ is not in a category!", channelName));
+        }
+    }
+    else
+    {
+        currentMessage.reply("Please choose a valid channel!")
     }
 }
 
