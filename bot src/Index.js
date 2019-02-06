@@ -39,7 +39,7 @@ var autoAssignedRole;
 var currentMembers = [];
 var currentUserIDs = [];
 
-const Token = "";
+const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DxCCBQ.WIFKMy7TPV35ZwSwdUuDZvky_WE";
 
 const prefix = "//"
 
@@ -93,6 +93,8 @@ bot.on("message", message => {
         var tryingToCommand = false;
 
         var command = message.content.substring(prefix.length).split(", ");
+        //Typically, command[0] is the command, command[1] is the name of role/channel/person to change/create/delete, and
+        //if there is a command[2] it is the new name/color/parent
 
         switch (command[0].toLowerCase())
         {
@@ -107,8 +109,15 @@ bot.on("message", message => {
                 {
                     if (validateName(command[1]))
                     {
-                        (command[2]) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
-                        createARole(command);
+                        if (validateDuplicates("role", command[1]))
+                        {
+                            (validateName(command[2])) ? (command[2] = setCorrectColor(command[2])) : (command[2] = 'DEFAULT');
+                            createARole(command);
+                        }
+                        else
+                        {
+                            message.reply("A role named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                        }
                     }
                     else
                     {
@@ -162,7 +171,7 @@ bot.on("message", message => {
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_ROLES");
                 if (doesUserHavePermission) {
-                    if (command[2])
+                    if (validateName(command[2]))
                     {
                         command[2] = setCorrectColor(command[2]);
                         validateRole(command[1]) ? changeRoleColor(command) : message.reply("Please choose a valid role!");
@@ -199,7 +208,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateName(command[1]) ? createChannelType(command[1], "text") : message.reply("Please choose a valid name!");
+                    if (validateDuplicates("text", command[1]))
+                    {
+                        validateName(command[1]) ? createChannelType(command[1], "text") : message.reply("Please choose a valid name!");
+                    }
+                    else
+                    {
+                        message.reply("A text channel named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                    }
                 }
                 break;
 
@@ -208,7 +224,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateName(command[1]) ? createChannelType(command[1], "voice") : message.reply("Please choose a valid name!");
+                    if (validateDuplicates("voice", command[1]))
+                    {
+                        validateName(command[1]) ? createChannelType(command[1], "voice") : message.reply("Please choose a valid name!");
+                    }
+                    else
+                    {
+                        message.reply("A voice channel named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                    }
                 }
                 break;
 
@@ -217,7 +240,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateName(command[1]) ? createChannelType(command[1], "category") : message.reply("Please choose a valid name!");
+                    if (validateDuplicates("category", command[1]))
+                    {
+                        validateName(command[1]) ? createChannelType(command[1], "category") : message.reply("Please choose a valid name!");
+                    }
+                    else
+                    {
+                        message.reply("A category named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                    }
                 }
                 break;
 
@@ -226,7 +256,7 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateChannel(command[1]) ? deleteChannel(command[1]) : message.reply("Please choose a valid channel!");
+                    validateChannel(command[1]) ? deleteChannel(command[1]) : message.reply("Please choose a valid channel or category!");
                 }
                 break;
 
@@ -237,7 +267,7 @@ bot.on("message", message => {
                 {
                     if (validateName(command[2]))
                     {
-                        validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel!");
+                        validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel or category!");
                     }
                     else
                     {
@@ -253,14 +283,6 @@ bot.on("message", message => {
                 if (doesUserHavePermission)
                 {
                     setChannelCategory(command);
-                }
-                break;
-
-            case "dechcat":
-                tryingToCommand = true;
-                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
-                if (doesUserHavePermission) {
-                    removeFromCategory(command);
                 }
                 break;
 
@@ -382,6 +404,72 @@ function validateCategory(channel)
     return isCategory;
 }
 
+function validateDuplicates(type, name)
+{
+    var hasNoDuplicates = false;
+    var duplicates = [];
+
+    switch (type)
+    {
+        case "role":
+            var currentRoles = currentMessage.guild.roles.array();
+            for (i = 0; i < currentRoles.length; i++)
+            {
+                if (currentRoles[i].name.toLowerCase() === name.toLowerCase())
+                {
+                    duplicates.push(currentRoles[i]);
+                }
+            }
+            break;
+        case "text":
+            var validChannels = currentMessage.guild.channels.array();
+            for (i = 0; i < validChannels.length; i++)
+            {
+                if (validChannels[i].type !== "text")
+                {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === name.toLowerCase())
+                {
+                    duplicates.push(validChannels[i]);
+                }
+            }
+            break;
+        case "voice":
+            var validChannels = currentMessage.guild.channels.array();
+            for (i = 0; i < validChannels.length; i++)
+            {
+                if (validChannels[i].type !== "voice")
+                {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === name.toLowerCase())
+                {
+                    duplicates.push(validChannels[i]);
+                }
+            }
+            break;
+        case "category":
+            var validChannels = currentMessage.guild.channels.array();
+            for (i = 0; i < validChannels.length; i++)
+            {
+                if (validChannels[i].type !== "category")
+                {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === name.toLowerCase())
+                {
+                    duplicates.push(validChannels[i]);
+                }
+            }
+            break;
+    }
+
+    (duplicates.length > 0) ? hasNoDuplicates = false : hasNoDuplicates = true;
+
+    return hasNoDuplicates;
+}
+
 function switchWhiteSpaceWithUnderscore(word)
 {
     //The 'g' in the regex function means global, and this means
@@ -410,7 +498,7 @@ function getColorName(decimal)
 
 function deleteARole(roleName)
 {
-    var currentRoles = currentMessage.guild.roles
+    var currentRoles = currentMessage.guild.roles;
     var roleToDelete = currentRoles.find(element => element.name.toLowerCase() === roleName.toLowerCase());
 
     roleToDelete.delete()
@@ -521,42 +609,6 @@ function setChannelCategory(command)
     var channel;
     var category;
 
-    if (validateName(command[1]) === false || validateName(command[2]) === false)
-    {
-        return currentMessage.reply("Please choose a valid channel or category!");
-    }
-
-    validChannels = currentMessage.guild.channels;
-    channelName = command[1];
-    categoryName = command[2];
-    channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
-    category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
-
-    if (validateChannel(channelName))
-    {
-        if (validateChannel(categoryName) && validateCategory(category))
-        {
-            channel.setParent(category)
-                .then(success => currentMessage.reply(util.format("Placed the channel '\%s'\ in the category '\%s'\.", channelName, categoryName)),
-                failure => currentMessage.reply("Cannot place that channel in that category."));
-        }
-        else
-        {
-            currentMessage.reply("Please choose a valid category!");
-        }
-    }
-    else
-    {
-        currentMessage.reply("Please choose a valid channel!")
-    }
-}
-
-function removeFromCategory(command)
-{
-    var validChannels;
-    var channelName;
-    var channel;
-
     if (validateName(command[1]) === false)
     {
         return currentMessage.reply("Please choose a valid channel!");
@@ -566,6 +618,43 @@ function removeFromCategory(command)
     channelName = command[1];
     channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
 
+    if (command.length === 2)
+    {
+        removeFromCategory(channelName, channel);
+    }
+
+    else {
+
+        if (validateName(command[2]) === false)
+        {
+            return currentMessage.reply("Please choose a valid category!");
+        }
+
+        categoryName = command[2];
+        category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+
+        if (validateChannel(channelName))
+        {
+            if (validateChannel(categoryName) && validateCategory(category))
+            {
+                channel.setParent(category)
+                    .then(success => currentMessage.reply(util.format("Placed the channel '\%s'\ in the category '\%s'\.", channelName, categoryName)),
+                    failure => currentMessage.reply("Cannot place that channel in that category."));
+            }
+            else
+            {
+                currentMessage.reply("Please choose a valid category!");
+            }
+        }
+        else
+        {
+            currentMessage.reply("Please choose a valid channel!")
+        }
+    }
+}
+
+function removeFromCategory(channelName, channel)
+{
     if (validateChannel(channelName))
     {
         if (channel.parent !== null)
