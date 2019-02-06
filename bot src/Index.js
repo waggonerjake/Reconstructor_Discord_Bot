@@ -235,7 +235,15 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel!");
+                    if (validateName(command[2]))
+                    {
+                        validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
+
                 }
                 break;
 

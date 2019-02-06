@@ -148,7 +148,19 @@ Example: //dech, New Category
 Example: //dech, New voice channel
 
 The first property is the name of the channel or category you are deleting. If no name is entered, no channel will be deleted.
+## Rename a Channel or Category
+#### Command:
+//rech, CHANNEL OR CATEGORY TO BE RENAMED, NEW NAME
+#### Description:
+Allows the user to rename channels or categories
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+Example: //rech, New Category, New Name Category
 
+Example: //rech, New voice channel, Even newer voice channel
+
+The first property is the name of the channel or category you want to rename. If no name is entered, it will not rename a category or channel. The second property is the new name you would like to give the channel or category. If no name is entered, it will not rename the category or channel. 
 
 
 
