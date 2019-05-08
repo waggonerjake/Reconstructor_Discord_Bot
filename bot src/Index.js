@@ -158,7 +158,14 @@ bot.on("message", message => {
                 {
                     if (validateName(command[2]))
                     {
-                        validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
+                        if (validateDuplicates("role", command[2]))
+                        {
+                            validateRole(command[1]) ? changeRoleName(command) : message.reply("Please choose a valid role!");
+                        }
+                        else
+                        {
+                            message.reply("A role named \'" + command[2] + "\' already exists! Either rename the current one or choose a unique name!");
+                        }
                     }
                     else
                     {
@@ -208,13 +215,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    if (validateDuplicates("text", command[1]))
+                    if (validateName(command[1]))
                     {
-                        validateName(command[1]) ? createChannelType(command[1], "text") : message.reply("Please choose a valid name!");
+                        validateDuplicates("text", command[1]) ? createChannelType(command[1], "text") : message.reply("A text channel named \'" + command[1] +
+                                                                                    "\' already exists! Either rename the current one or choose a unique name!");
                     }
                     else
                     {
-                        message.reply("A text channel named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                        message.reply("Please choose a valid name!");
                     }
                 }
                 break;
@@ -224,13 +232,14 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    if (validateDuplicates("voice", command[1]))
+                    if (validateName(command[1]))
                     {
-                        validateName(command[1]) ? createChannelType(command[1], "voice") : message.reply("Please choose a valid name!");
+                        validateDuplicates("voice", command[1]) ? createChannelType(command[1], "voice") : message.reply("A text channel named \'" + command[1] +
+                                                                                    "\' already exists! Either rename the current one or choose a unique name!");
                     }
                     else
                     {
-                        message.reply("A voice channel named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                        message.reply("Please choose a valid name!");
                     }
                 }
                 break;
@@ -240,49 +249,127 @@ bot.on("message", message => {
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    if (validateDuplicates("category", command[1]))
+                    if (validateName(command[1]))
                     {
-                        validateName(command[1]) ? createChannelType(command[1], "category") : message.reply("Please choose a valid name!");
+                        validateDuplicates("category", command[1]) ? createChannelType(command[1], "category") : message.reply("A text channel named \'" + command[1] +
+                                                                            "\' already exists! Either rename the current one or choose a unique name!");
                     }
                     else
                     {
-                        message.reply("A category named \'" + command[1] + "\' already exists! Either rename the current one or choose a unique name!");
+                        message.reply("Please choose a valid name!");
                     }
                 }
                 break;
 
-            case "dech":
+            case "detech":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    validateChannel(command[1]) ? deleteChannel(command[1]) : message.reply("Please choose a valid channel or category!");
+                    if (validateName(command[1]))
+                    {
+                        validateChannel(command[1]) ? deleteChannel(command[1], "text") : message.reply("Please choose a valid channel!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
                 }
                 break;
 
-            case "rech":
+            case "devoch":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    if (validateName(command[1]))
+                    {
+                        validateChannel(command[1]) ? deleteChannel(command[1], "voice") : message.reply("Please choose a valid channel!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
+                }
+                break;
+
+            case "decat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    if (validateName(command[1]))
+                    {
+                        validateCategory(command[1]) ? deleteChannel(command[1], "category") : message.reply("Please choose a valid category!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
+                }
+                break;
+
+            case "retech":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
                     if (validateName(command[2]))
                     {
-                        validateChannel(command[1]) ? renameChannel(command) : message.reply("Please choose a valid channel or category!");
+                        validateChannel(command[1]) ? renameChannel(command, "text") : message.reply("Please choose a valid channel!");
                     }
                     else
                     {
                         message.reply("Please choose a valid name!");
                     }
-
                 }
                 break;
 
-            case "chcat":
+            case "revoch":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission) {
+                    if (validateName(command[2]))
+                    {
+                        validateChannel(command[1]) ? renameChannel(command, "voice") : message.reply("Please choose a valid channel!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
+                }
+                break;
+
+            case "recat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission) {
+                    if (validateName(command[2]))
+                    {
+                            validateCategory(command[1]) ? renameChannel(command, "category") : message.reply("Please choose a valid category!");
+                    }
+                    else
+                    {
+                        message.reply("Please choose a valid name!");
+                    }
+                }
+                break;
+
+            case "chtecat":
                 tryingToCommand = true;
                 doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
                 if (doesUserHavePermission)
                 {
-                    setChannelCategory(command);
+                    setChannelCategory(command, "text");
+                }
+                break;
+
+            case "chvocat":
+                tryingToCommand = true;
+                doesUserHavePermission = validateAuthor("MANAGE_CHANNELS");
+                if (doesUserHavePermission)
+                {
+                    setChannelCategory(command, "voice");
                 }
                 break;
 
@@ -327,10 +414,10 @@ function validateAuthor(action)
     return author.hasPermission(action, false, true, true);
 }
 
-//Check if the role is blank
+//Check if the name is blank
 function validateName(name)
 {
-    var isRoleValid = false;
+    var isNameValid = false;
 
     try
     {
@@ -341,8 +428,8 @@ function validateName(name)
         return false;
     }
 
-    (name === "") ? isRoleValid = false : isRoleValid = true;
-    return isRoleValid;
+    (name === "") ? isNameValid = false : isNameValid = true;
+    return isNameValid;
 }
 
 function validateRole(roleName)
@@ -367,7 +454,7 @@ function validateUserToUserNameChange(userIDInput)
 
 function setCorrectColor(colorName)
 {
-    colorName = switchWhiteSpaceWithUnderscore(colorName);
+    colorName = colorName.replace(/\s/g, "_");
     colorName = validatePink(colorName);
     return ((COLOR_NAMES.includes(colorName.toUpperCase()) || COLOR_NUMBERS.includes(colorName)) ? colorName : 'DEFAULT');
 }
@@ -397,10 +484,17 @@ function validateChannel(channelName)
     return Boolean(validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase()));
 }
 
-function validateCategory(channel)
+function validateCategory(categoryName)
 {
+    if (validateChannel(categoryName) === false)
+    {
+        return false;
+    }
+
     var isCategory = false;
-    (channel.type === "category") ? isCategory = true : isCategory = false;
+    validChannels = currentMessage.guild.channels;
+    category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+    (category.type === "category") ? isCategory = true : isCategory = false;
     return isCategory;
 }
 
@@ -408,6 +502,7 @@ function validateDuplicates(type, name)
 {
     var hasNoDuplicates = false;
     var duplicates = [];
+    var validChannels;
 
     switch (type)
     {
@@ -422,7 +517,8 @@ function validateDuplicates(type, name)
             }
             break;
         case "text":
-            var validChannels = currentMessage.guild.channels.array();
+            validChannels = currentMessage.guild.channels.array();
+            name = name.replace(/\s/g, "-"); //Text channels cannot have spaces
             for (i = 0; i < validChannels.length; i++)
             {
                 if (validChannels[i].type !== "text")
@@ -436,7 +532,7 @@ function validateDuplicates(type, name)
             }
             break;
         case "voice":
-            var validChannels = currentMessage.guild.channels.array();
+            validChannels = currentMessage.guild.channels.array();
             for (i = 0; i < validChannels.length; i++)
             {
                 if (validChannels[i].type !== "voice")
@@ -450,7 +546,7 @@ function validateDuplicates(type, name)
             }
             break;
         case "category":
-            var validChannels = currentMessage.guild.channels.array();
+            validChannels = currentMessage.guild.channels.array();
             for (i = 0; i < validChannels.length; i++)
             {
                 if (validChannels[i].type !== "category")
@@ -468,14 +564,6 @@ function validateDuplicates(type, name)
     (duplicates.length > 0) ? hasNoDuplicates = false : hasNoDuplicates = true;
 
     return hasNoDuplicates;
-}
-
-function switchWhiteSpaceWithUnderscore(word)
-{
-    //The 'g' in the regex function means global, and this means
-    //do not stop after the first instance of the character, find
-    //all of them
-    return word.replace(/\s/g, "_");
 }
 
 function createARole(command)
@@ -580,30 +668,28 @@ function createChannelType(name, type)
         failure => currentMessage.reply("Cannot create that channel."));
 }
 
-function deleteChannel(channelName)
+function deleteChannel(channelName, type)
 {
-    var validChannels = currentMessage.guild.channels;
-    var channelToDelete = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
+    var channelToDelete = findChannel(channelName, type);
 
     channelToDelete.delete()
         .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been removed", channelName)),
         failure => currentMessage.reply("Cannot delete that channel."));
 }
 
-function renameChannel(command)
+function renameChannel(command, type)
 {
-    var validChannels = currentMessage.guild.channels;
     var currentChannelName = command[1];
-    var channelToRename = validChannels.find(element => element.name.toLowerCase() === currentChannelName.toLowerCase());
     var newName = command[2];
+    var channelToRename = findChannel(currentChannelName, type);
 
     channelToRename.setName(newName)
-        .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been renamed to \'%s'\. ", currentChannelName, newName)), failure => currentMessage.reply("Cannot rename that channel."));
+        .then(success => currentMessage.reply(util.format("The channel \'%s'\ has been renamed to \'%s'\. ", currentChannelName, newName)),
+            failure => currentMessage.reply("Cannot rename that channel."));
 }
 
-function setChannelCategory(command)
+function setChannelCategory(command, type)
 {
-    var validChannels;
     var channelName;
     var categoryName;
     var channel;
@@ -614,9 +700,8 @@ function setChannelCategory(command)
         return currentMessage.reply("Please choose a valid channel!");
     }
 
-    validChannels = currentMessage.guild.channels;
     channelName = command[1];
-    channel = validChannels.find(element => element.name.toLowerCase() === channelName.toLowerCase());
+    channel = findChannel(channelName, type);
 
     if (command.length === 2)
     {
@@ -631,11 +716,11 @@ function setChannelCategory(command)
         }
 
         categoryName = command[2];
-        category = validChannels.find(element => element.name.toLowerCase() === categoryName.toLowerCase());
+        category = findChannel(categoryName, "category");
 
         if (validateChannel(channelName))
         {
-            if (validateChannel(categoryName) && validateCategory(category))
+            if (validateCategory(categoryName))
             {
                 channel.setParent(category)
                     .then(success => currentMessage.reply(util.format("Placed the channel '\%s'\ in the category '\%s'\.", channelName, categoryName)),
@@ -648,7 +733,7 @@ function setChannelCategory(command)
         }
         else
         {
-            currentMessage.reply("Please choose a valid channel!")
+            currentMessage.reply("Please choose a valid channel!");
         }
     }
 }
@@ -670,7 +755,7 @@ function removeFromCategory(channelName, channel)
     }
     else
     {
-        currentMessage.reply("Please choose a valid channel!")
+        currentMessage.reply("Please choose a valid channel!");
     }
 }
 
@@ -705,6 +790,46 @@ function createListOfUserInputtedIDs()
         inputtedUserID[i] = "<@!" + inputtedUserID[i] + ">";
     }
     return inputtedUserID;
+}
+
+function findChannel(channelName, type)
+{
+    var validChannels = currentMessage.guild.channels.array();
+    var channel;
+
+    switch (type) {
+        case "text":
+            for (i = 0; i < validChannels.length; i++) {
+                if (validChannels[i].type !== "text") {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === channelName.toLowerCase()) {
+                    channel = validChannels[i];
+                }
+            }
+            break;
+        case "voice":
+            for (i = 0; i < validChannels.length; i++) {
+                if (validChannels[i].type !== "voice") {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === channelName.toLowerCase()) {
+                    channel = validChannels[i];
+                }
+            }
+            break;
+        case "category":
+            for (i = 0; i < validChannels.length; i++) {
+                if (validChannels[i].type !== "category") {
+                    continue;
+                }
+                if (validChannels[i].name.toLowerCase() === channelName.toLowerCase()) {
+                    channel = validChannels[i];
+                }
+            }
+            break;
+    }
+    return channel;
 }
 
 bot.login(Token);
