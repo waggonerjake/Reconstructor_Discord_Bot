@@ -39,9 +39,9 @@ var autoAssignedRole;
 var currentMembers = [];
 var currentUserIDs = [];
 
-const Token = "";
+const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DzzbhA.hh6TxVRxAV96grpIDjBFH6xzdxI";
 
-const prefix = "//"
+const prefix = "//";
 
 //Creating the actual bot
 var bot = new Discord.Client();
@@ -605,7 +605,7 @@ function changeANickname(command)
         newNickname = changeNicknameToAnotherUser(newNickname);
     }
 
-    command[2] = removeUnwantedCharacters(command[2], unwantedCharacters)
+    command[2] = removeUnwantedCharacters(command[2], unwantedCharacters);
 
     if (currentUserIDs.includes(command[2]))
     {

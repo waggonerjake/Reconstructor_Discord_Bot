@@ -26,7 +26,7 @@ Allows the user to delete *valid* roles in the server.
 #### Permission:
 Must be able to **manage roles** or be an **administrator**.
 #### Properties and Usage:
-Example: //dero, New Role
+Example: //dero, old Role
 
 The first property is the name of the role the user wishes to delete. If no name is given, it will not delete a role.
 ## Show all roles:
@@ -124,46 +124,121 @@ Must be able to **manage channels** or be an **administrator**.
 Example: //crvoch, New voice channel
 
 The first property is the name of the voice channel you are creating. If no name is entered, no channel will be created.
-## Create a Channel Category:
+## Create a Category:
 #### Command:
 //crcat, CATEGORY NAME
 #### Description:
-Allows the user to create a new channel category.
+Allows the user to create a new category.
 #### Permission:
 Must be able to **manage channels** or be an *administrator**.
 #### Properties and Usage:
 Example: //crcat, New Category
 
 The first property is the name of the category you are creating. If no name is entered, no channel will be created.
-## Delete a Channel or Category:
+## Delete a Text Channel
 #### Command:
-//dech, CHANNEL OR CATEGORY NAME
+//detech, CHANNEL NAME
 #### Description:
-Allows the user to delete channels or categories.
+Allows the user to delete a text channel.
 #### Permission:
 Must be able to **manage channels** or be an **administrator**.
 #### Properties and Usage:
-Example: //dech, New Category
 
-Example: //dech, New voice channel
+Example: //detech, old-text-channel
 
-The first property is the name of the channel or category you are deleting. If no name is entered, no channel will be deleted.
-## Rename a Channel or Category
+The first property is the name of the channel you are deleting. If no name is entered, no channel will be deleted.
+## Delete a Voice Channel
 #### Command:
-//rech, CHANNEL OR CATEGORY TO BE RENAMED, NEW NAME
+//devoch, CHANNEL NAME
 #### Description:
-Allows the user to rename channels or categories
+Allows a user to delete a voice channel.
 #### Permission:
 Must be able to **manage channels** or be an **administrator**.
 #### Properties and Usage:
-Example: //rech, New Category, New Name Category
 
-Example: //rech, New voice channel, Even newer voice channel
+Example: //devoch, old voice channel
 
-The first property is the name of the channel or category you want to rename. If no name is entered, it will not rename a category or channel. The second property is the new name you would like to give the channel or category. If no name is entered, it will not rename the category or channel. 
+The first property is the name of the channel you are deleting. If no name is entered, no channel will be deleted.
+## Delete a Category
+#### Command:
+//decat, CATEGORY NAME
+#### Description:
+Allows a user to delete a category.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //decat, old category
+
+The first property is the name of the category you are deleting. If no name is entered, no category will be deleted.
+## Rename a Text Channel
+#### Command:
+//retech, TEXT CHANNEL TO BE RENAMED, NEW NAME
+#### Description:
+Allows a user to rename a text channel.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //retech, old text channel, new name text channel
+
+The first property is the text channel that already exists that the user would like to change the name of. If no name/invalid name is given, it will not rename a channel.
+The second property is the new name you'd like to give to that text channel. If no name is given, it will not rename the text channel.
+## Rename a Voice Channel
+#### Command:
+//revoch, VOICE CHANNEL TO BE RENAMED, NEW NAME
+#### Description:
+Allows a user to rename a voice channel.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //revoch, old voice channel, new name voice channel
+
+The first property is the voice channel that already exists that the user would like to change the name of. If no name/invalid name is given, it will not rename a channel.
+The second property is the new name you'd like to give to that voice channel. If no name is given, it will not rename the voice channel.
+## Rename a Category
+#### Command:
+//recat, CATEGORY TO BE RENAMED, NEW NAME
+#### Description:
+Allows a user to rename a category.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //recat, old category, new name for category
+
+The first property is the category that already exists that the user would like to change the name of. If no name/invalid name is given, it will not rename a category.
+The second property is the new name you'd like to give to that category. If no name is given, it will not rename the category.
+## Change the Category of a Text Channel
+#### Command:
+//chtecat, TEXT CHANNEL TO MOVE, NEW PARENT CATEGORY(optional)
+#### Description:
+Allows a user to change the category a text channel sits under.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //chtecat, some text channel, new parent category
+
+Example: //chtecat, some text channel
 
 
+The first property is the text channel that already exists that the user would like to put in a category. If no name/invalid name is given, move a channel.
+The second property is the category that the you would like to put the text channel in. If no name is given, it will remove the category of this text channel and move it up top. If an invalid category is given, it will not move the channel.
+## Change the Category of a Voice Channel
+#### Command:
+//chvocat, VOICE CHANNEL TO MOVE, NEW PARENT CATEGORY(optional)
+#### Description:
+Allows a user to change the category a voice channel sits under.
+#### Permission:
+Must be able to **manage channels** or be an **administrator**.
+#### Properties and Usage:
+
+Example: //chvocat, some voice channel, new parent category
+
+Example: //chvocat, some voice channel
 
 
-
-
+The first property is the voice channel that already exists that the user would like to put in a category. If no name/invalid name is given, move a channel.
+The second property is the category that the you would like to put the voice channel in. If no name is given, it will remove the category of this voice channel and move it up top. If an invalid category is given, it will not move the channel.
