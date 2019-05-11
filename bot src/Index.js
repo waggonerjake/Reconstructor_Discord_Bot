@@ -39,7 +39,7 @@ var autoAssignedRole;
 var currentMembers = [];
 var currentUserIDs = [];
 
-const Token = "NTA0ODE5NzkxMDAyMDc1MTM3.DzzbhA.hh6TxVRxAV96grpIDjBFH6xzdxI";
+const Token = "";
 
 const prefix = "//";
 
